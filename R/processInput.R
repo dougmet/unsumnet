@@ -10,6 +10,12 @@
 #' 
 processInput <- function(constraints) {
   
-  
+  if (is.data.frame(constraints)) {
+    
+  } else if (is.matrix(constraints)) {
+    
+  } else {
+    stop("constraints must be a matrix or a data frame")
+  }
   
 }

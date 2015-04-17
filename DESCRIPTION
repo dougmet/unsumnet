@@ -8,3 +8,4 @@ License: GPL3
 LazyData: true
 LinkingTo: Rcpp
 Imports: Rcpp
+Suggests: testthat
