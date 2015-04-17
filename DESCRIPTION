@@ -1,5 +1,5 @@
 Package: banknet
-Title: What the Package Does (one line, title case)
+Title: Solve Row and Column Sum Network Constraint Problems
 Version: 0.0.0.9000
 Authors@R: Douglas Ashton <douglas.j.ashton@gmail.com> [aut]
 Description: What the package does (one paragraph)
