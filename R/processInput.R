@@ -17,6 +17,7 @@ processInput <- function(constraints, useRowNames=FALSE) {
   defaultNames <- function() paste0("V",1:nrow(constraints))
   
   if (is.data.frame(constraints)) {
+    # For data frames the idea is to get the names out and ensure it's numeric
     
     # Try to get the names, first row names
     charCols <- which(sapply(constraints, class) %in% c("character","factor"))
@@ -30,6 +31,7 @@ processInput <- function(constraints, useRowNames=FALSE) {
       vertexNames <- defaultNames()
     }
     
+    # Warning or stop? Can't have duplicates.
     if (any(duplicated(vertexNames))) {
       warning("Duplicates in vertex names: ",
               vertexNames[duplicated(vertexNames)], ". Using defaults.")
