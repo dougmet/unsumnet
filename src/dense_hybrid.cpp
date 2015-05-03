@@ -97,29 +97,11 @@ public:
 
 dense_hybrid *gdh;
 
-int main(int argc, char *argv[])
-{
-    
-    dense_hybrid *dh; // everything happens in this object
-    
-    dh = new dense_hybrid;
-    gdh = dh; // global pointer
-    
-    dh->runjob(argv[1]);
-    
-
-    
-    // Now everything is set up call the runjob() function and the rest will happen from there
-
-    return 0;
-}
-
-
 
 
 int dense_hybrid::runjob(const char *infilename)
 {
-    
+    gdh=this;
     // This function is the main job controller
     
     long i,j,k,l,iact;                           // general integers
