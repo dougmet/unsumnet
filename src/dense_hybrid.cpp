@@ -16,7 +16,9 @@ using namespace std;
 #define ITMAX 10000
 
 
-#include "../../transition_gce/tmclass.h"
+#ifdef ENERGYBIAS
+  #include "../../transition_gce/tmclass.h"
+#endif 
 
 #include "minimise.cpp"
 
