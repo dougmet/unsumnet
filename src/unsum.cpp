@@ -1,21 +1,23 @@
 #include <Rcpp.h>
+#include "dense_hybrid.h"
 using namespace Rcpp;
 
 
 // [[Rcpp::export]]
-int timesTwo(int x) {
-   return x * 2;
-}
-
-int main(int argc, char *argv[])
+int unsumcpp(int awhole,
+          int ton,
+          double of,
+          double variables)
 {
     
     dense_hybrid *dh; // everything happens in this object
     
-    dh = new dense_hybrid;
+    dh = new dense_hybrid(nn, target_ne);
     gdh = dh; // global pointer
     
-    dh->runjob(argv[1]);
+    dh->runjob(awhole, ton, of, variables);
+    
+    delete dh;
 
     return 0;
 }

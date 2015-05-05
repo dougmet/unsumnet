@@ -1,114 +1,73 @@
-// This code is for dense graphs so we have the entire adjancy matrix
-
-
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
-#include <sstream>
-#include <math.h>
-#include <string>
-#include <cstring>
-using namespace std; 
-#include "MersenneTwister.h"
-
-#define FTOL 1e-16
-//#define ITMAX 100000
-#define ITMAX 10000
-
-
-#ifdef ENERGYBIAS
-  #include "../../transition_gce/tmclass.h"
-#endif 
-
-#include "minimise.cpp"
-
-#include "move_class.h"
-
-
-
-void write_monitor(const char *filename, long t, double data)
-{
-    ofstream monfile;
-    monfile.open(filename, ios::app);
-    monfile << t << " " << data << endl;
-    monfile.close();
-}
-
-class dense_hybrid
-{
-    
-public:
-	//////// VARIABLES //////////
-    
-    // Order N*N arrays
-    double *W;          // Edge weights
-    int *A;             // Adjancancy Matrix
-    long *active_edges; // Which edges are in use? Useful for sparser matrices
-    long *active_edges0;// For correlation function
-    
-    // Order N arrays
-    double *target_out; // Target for sum of out weights
-    double *target_in;  // Target for sum of in weights
-    double *sum_out;    // Current sum of out weights
-    double *sum_in;     // Current sum of in weights
-    bool *on_out;
-    bool *on_in;
-    double *top,*tip;   // Speed up the scaled energy calculation by storing some powers
-    bool goforquench;
-    
-    // For conjugate gradient
-    double *gradW;
-    double *activeW;
-    double *cg_sum_in;
-    double *cg_sum_out;
-    double *cg_g, *cg_h;
-
-    
-    double energy;
-    
-    
-    MTRand mt;          // Random number generator
-
-    double SCALE_FAC;
-    double CG_TARGET;
-
-    double maxw,minw, scalew;    // restrict the range of Ws (careful!)
-    long nn, ncycles, vol;
-    long target_ne, ne, ne0;     // Target number of edges and actual number, number at end of hot time
-    
-    double beta, mu;        // fields for energy and ne (beta is inverse temperature, beta=1/T)
-    double cooling_rate;
-    
-    
-    ////////// METHODS (AKA FUNCTIONS) //////////
-    //dense_hybrid(); // constructor
-    int runjob(const char *infilename);  // everything happens from this function
-    int read_input(const char *infilename);
-    void create_arrays();
-    void initialise_arrays();
-	void reset_arrays();
-    double total_energy(double *inW);
-    double total_energy();
-    bool rowcol_iterate();
-    void gradient_energy(double *inW, double *xi);
-    void conjugate_gradient();
-    
-};
 
 dense_hybrid *gdh;
 
-
-
-int dense_hybrid::runjob(const char *infilename)
+dense_hybrid::dense_hybrid(int nn_in, int target_ne_in)
 {
-    gdh=this;
-    // This function is the main job controller
+    ///////////////////////////
+    //// CREATE THE ARRAYS ////
+    ///////////////////////////
     
-    long i,j,k,l,iact;                           // general integers
-    int newi,newj,nrn,newk;                          // Edge moves
+    nn = nn_in;
+    target_ne = target_ne_in;
+    
+    // They're 1D to keep pointers simple
+    // I've put them in COLUMN-MAJOR format as this is compatible with blas and lapack
+    // libraries incase we want eigenvectors etc.
+    // To get element A_ij address A[i + j*nn]
+    A = new int [nn*nn];
+    W = new double [nn*nn];
+    active_edges = new long [target_ne*2];            // first ne elements give active edges
+    active_edges0 = new long [target_ne*2];    // For correlation functions
+    vol = nn*(nn-1);                            // total number of possible edges
+    
+    // These arrays store node properties
+    target_out = new double [nn];
+    target_in = new double [nn];
+    sum_out = new double [nn];
+    sum_in = new double [nn];
+    
+    on_out = new bool [nn];
+    on_in = new bool [nn];
+    top = new double [nn];
+    tip = new double [nn];
+    
+    // Conjugate gradient arrays
+    activeW= new double [target_ne*2];
+    gradW = new double [target_ne*2];
+    cg_g = new double [target_ne*2];
+    cg_h = new double [target_ne*2];
+    cg_sum_out = new double [nn];
+    cg_sum_in = new double [nn];
+    
+    // how many bloody arrays could it need?
+    pcom = new double [target_ne*2];
+    xicom = new double [target_ne*2];
+    
+    ncom = target_ne*2;
+    
+    gdh=this;
+}
+
+
+int dense_hybrid::runjob(int ncycles,
+                         long  mct_schedule,
+                         long  hot_time,
+                         double beta0,
+                         double betamax,
+                         double mu,
+                         double cooling_rate,
+                         long max_time,
+                         double cgmax, // when to attempt conjugate gradient
+                         double CG_TARGET)
+{
+    // This function is the main job controller
+
+    long i,j,k,l,iact;                          // general integers
+    int newi,newj,nrn,newk;                     // Edge moves
     int ir, mr;                                 // for choosing moves
-    long mct, mct_schedule, hot_time, max_time;       // Monte Carlo time
-    double deltaE, deltaM, w, dw, r, prob, cg_energy, betamax, beta0, cgmax, tenergy, temax, localmaxw;    // Working numbers
+    long mct, max_time;                         // Monte Carlo time
+    double deltaE, deltaM, w, dw, r, prob, cg_energy;
+    double tenergy, temax, localmaxw;    // Working numbers
 
 	double oldenergy;
 	int nsmallderiv=0;
@@ -136,37 +95,11 @@ int dense_hybrid::runjob(const char *infilename)
     if (nsolutions>0)
         cout << "Picking up from solution " << nsolutions-1 << endl;
     
-//    // First read in the input file
-//    read_input();
-//    
-//    // Allocate the memory we need
-//    create_arrays();
-//    
-//    // Initialise arrays and other constants
-//    initialise_arrays();    
-    
-    
+
 
     
 	// Load the input file (to be replaced with something more sophisticated)
-    ifstream infile;
-    infile.open(infilename);
-    infile >> ncycles;
-    infile >> mct_schedule;
-    infile >> hot_time;
-    infile >> nn;
-    infile >> target_ne;
-    infile >> beta0;
-    infile >> betamax;
-    infile >> mu;
-    infile >> cooling_rate;
-    infile >> max_time;
-    infile >> cgmax; // when to attempt conjugate gradient
-    infile >> CG_TARGET;
-    
-//    infile >> SCALE_FAC;
     SCALE_FAC=1.0;
-    infile.close();
     
     beta=beta0;
     
@@ -177,44 +110,7 @@ int dense_hybrid::runjob(const char *infilename)
     cout << endl;
     
     
-    ///////////////////////////
-    //// CREATE THE ARRAYS ////
-    ///////////////////////////
-    
-    // They're 1D to keep pointers simple
-    // I've put them in COLUMN-MAJOR format as this is compatible with blas and lapack
-    // libraries incase we want eigenvectors etc.
-    // To get element A_ij address A[i + j*nn]
-    A = new int [nn*nn];
-    W = new double [nn*nn];
-    active_edges = new long [target_ne*2];            // first ne elements give active edges
-    active_edges0 = new long [target_ne*2];    // For correlation functions
-    vol = nn*(nn-1);                            // total number of possible edges
 
-    // These arrays store node properties
-    target_out = new double [nn];
-    target_in = new double [nn];
-    sum_out = new double [nn];
-    sum_in = new double [nn];
-    
-    on_out = new bool [nn];
-    on_in = new bool [nn];
-    top = new double [nn];
-    tip = new double [nn];
-
-    // Conjugate gradient arrays
-    activeW= new double [target_ne*2];
-    gradW = new double [target_ne*2];
-    cg_g = new double [target_ne*2];
-    cg_h = new double [target_ne*2];
-    cg_sum_out = new double [nn];
-    cg_sum_in = new double [nn];
-    
-    // how many bloody arrays could it need?
-    pcom = new double [target_ne*2];
-	xicom = new double [target_ne*2];
-	
-	ncom = target_ne*2;
     
     
     ///////////////////////////
@@ -222,9 +118,9 @@ int dense_hybrid::runjob(const char *infilename)
     ///////////////////////////
     
     
+#ifdef ENERGYBIAS
     // Collection matrix
     int nbins=10000;
-#ifdef ENERGYBIAS
     tm = new tmcontinuous(0.0, 10.0, 15, nbins, TM_NO_END_CORRECTION); // note -- you are doing end correction
 #endif
 		
