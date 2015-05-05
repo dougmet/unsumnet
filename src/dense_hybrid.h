@@ -82,7 +82,7 @@ public:
     
     
     ////////// METHODS (AKA FUNCTIONS) //////////
-    //dense_hybrid(); // constructor
+    dense_hybrid(nn_in, target_ne_in); // constructor
     int runjob(const char *infilename);  // everything happens from this function
     int read_input(const char *infilename);
     void create_arrays();
