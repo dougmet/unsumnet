@@ -92,7 +92,9 @@ public:
                 double cooling_rate,
                 long max_time,
                 double cgmax, // when to attempt conjugate gradient
-                double CG_TARGET);
+                double CG_TARGET,
+                bool MAXEDGES,
+                bool NORETURN);
 
     int read_input(const char *infilename);
     void create_arrays();

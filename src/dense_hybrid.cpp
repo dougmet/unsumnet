@@ -53,7 +53,7 @@ int dense_hybrid::init_targets()
 {
     // Now set the targets (these will be loaded in eventually)
     maxw=0;
-    for (i=0;i<nn;i++)
+    for (int i=0;i<nn;i++)
     {
         on_out[i] = on_in[i] = true;
         if (target_out[i]<=1e-12)
@@ -96,7 +96,8 @@ int dense_hybrid::runjob(int ncycles,
                          long max_time,
                          double cgmax, // when to attempt conjugate gradient
                          double CG_TARGET,
-                         bool MAXEDGES)
+                         bool MAXEDGES,
+                         bool NORETURN)
 {
     // This function is the main job controller
 
@@ -715,46 +716,10 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                         }
                     }
                     
-                    
-                    if (hittarget)
-                    {
-                        sprintf(fname,"adjacency%3.3d.dat",nsolutions);
-                        afile.open(fname);
-                        for (i=0;i<nn;i++)
-                        {
-                            for (j=0;j<nn;j++)
-                                afile << A[i + j*nn] << " ";
-                            afile << endl;
-                        }
-                        afile.close();
-                        
-                        sprintf(fname,"weights%3.3d.dat",nsolutions);
-                        wfile.open(fname);
-                        wfile.precision(16);
-                        for (i=0;i<nn;i++)
-                        {
-                            for (j=0;j<nn;j++)
-                                wfile << scalew*W[i + j*nn] << " ";
-                            wfile << endl;
-                        }
-                        wfile.close();
-                        
-                        sfile.open("sumtargets.dat");
-                        sfile.precision(16);
-                        for (i=0;i<nn;i++)
-                            sfile << target_in[i] << " " << cg_sum_in[i] << " " << target_out[i] << " " << cg_sum_out[i] << endl;
-                        sfile.close();
-                        
+                                            
                         cout << endl << ">>>>>> hit target " << nsolutions << " >>>>>>" << endl << endl;
 
-                        nsolutions++;
-                        beta=beta0;
-                        mct=0;
-                        reset_arrays();
-//						move[0]->NperMC=move[1]->NperMC=target_ne;
-                        
-                        if (nsolutions>100)
-                            exit(0);
+                        return(0);
                         
                     }
 
