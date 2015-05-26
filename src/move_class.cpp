@@ -7,6 +7,8 @@
  *
  */
 
+ #include "move_class.h"
+
 move_class::move_class(const char *setname, int setnpermc, double setstep, double setmin, double setmax, double settarget)
 {
     strcpy(name, setname);

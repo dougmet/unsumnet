@@ -24,7 +24,7 @@ using namespace std;
   #include "tmclass.h"
 #endif 
 
-#include "minimise.cpp"
+//#include "minimise.cpp" // No conjugate gradient for now
 
 #include "move_class.h"
 
@@ -82,8 +82,18 @@ public:
     
     
     ////////// METHODS (AKA FUNCTIONS) //////////
-    dense_hybrid(nn_in, target_ne_in); // constructor
-    int runjob(const char *infilename);  // everything happens from this function
+    dense_hybrid(int nn_in, int target_ne_in); // constructor
+    int runjob(int ncycles,
+                long  mct_schedule,
+                long  hot_time,
+                double beta0,
+                double betamax,
+                double mu,
+                double cooling_rate,
+                long max_time,
+                double cgmax, // when to attempt conjugate gradient
+                double CG_TARGET);
+
     int read_input(const char *infilename);
     void create_arrays();
     void initialise_arrays();

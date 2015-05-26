@@ -2,12 +2,14 @@
 #include "dense_hybrid.h"
 using namespace Rcpp;
 
+// This function faces R. It creates a dense_hybrid object and launches
+// the simulations, extracting the results and sending back to R.
 
 // [[Rcpp::export]]
 int unsumcpp(int awhole,
-          int ton,
-          double of,
-          double variables)
+             int ton,
+             double of,
+             double variables)
 {
     
     dense_hybrid *dh; // everything happens in this object

@@ -1,3 +1,4 @@
+#include "dense_hybrid.h"
 
 dense_hybrid *gdh;
 
@@ -39,15 +40,51 @@ dense_hybrid::dense_hybrid(int nn_in, int target_ne_in)
     cg_sum_out = new double [nn];
     cg_sum_in = new double [nn];
     
-    // how many bloody arrays could it need?
-    pcom = new double [target_ne*2];
-    xicom = new double [target_ne*2];
-    
-    ncom = target_ne*2;
+ //   // how many bloody arrays could it need?
+ //   pcom = new double [target_ne*2];
+ //   xicom = new double [target_ne*2];
+ //   
+ //   ncom = target_ne*2;
     
     gdh=this;
 }
 
+int dense_hybrid::init_targets()
+{
+    // Now set the targets (these will be loaded in eventually)
+    maxw=0;
+    for (i=0;i<nn;i++)
+    {
+        on_out[i] = on_in[i] = true;
+        if (target_out[i]<=1e-12)
+            on_out[i]=false;
+        if (target_in[i]<=1e-12)
+            on_in[i]=false;
+        
+        if (target_in[i]>maxw)
+            maxw = target_in[i];
+        
+        if (target_out[i]>maxw)
+            maxw = target_out[i];
+        
+    }
+
+    scalew = maxw;
+    maxw=1.2;
+    minw=0.00001/scalew;
+
+    targetsread = true;
+
+    cout << "Max allowed edge weight = " << scalew*maxw << ". Largest target=" << scalew << endl;
+
+    // Now scale the whole problem
+    for (i=0;i<nn;i++)
+    {
+        target_out[i] /= scalew;
+        target_in[i] /= scalew;
+    }
+
+}
 
 int dense_hybrid::runjob(int ncycles,
                          long  mct_schedule,
@@ -58,16 +95,18 @@ int dense_hybrid::runjob(int ncycles,
                          double cooling_rate,
                          long max_time,
                          double cgmax, // when to attempt conjugate gradient
-                         double CG_TARGET)
+                         double CG_TARGET,
+                         bool MAXEDGES)
 {
     // This function is the main job controller
 
-    long i,j,k,l,iact;                          // general integers
-    int newi,newj,nrn,newk;                     // Edge moves
-    int ir, mr;                                 // for choosing moves
-    long mct, max_time;                         // Monte Carlo time
-    double deltaE, deltaM, w, dw, r, prob, cg_energy;
-    double tenergy, temax, localmaxw;    // Working numbers
+    long i,j,k,l,iact;                  // general integers
+    int newi,newj,nrn,newk;             // Edge moves
+    int ir, mr;                         // for choosing moves
+    long mct;                           // Monte Carlo time
+    double deltaE, deltaM, w, dw;
+    double r, prob, cg_energy;
+    double tenergy, temax, localmaxw;   // Working numbers
 
 	double oldenergy;
 	int nsmallderiv=0;
@@ -78,98 +117,16 @@ int dense_hybrid::runjob(int ncycles,
 	int nsolutions=0;
     
     
-    ofstream afile, wfile, sfile, monfile;
-    ifstream targetfile;
 
-    
-    sprintf(fname,"adjacency%3.3d.dat",nsolutions);
-    targetfile.open(fname);
-    while (targetfile.good())
-    {
-        nsolutions++;
-        targetfile.close();
-        targetfile.clear();
-        sprintf(fname,"adjacency%3.3d.dat",nsolutions);
-        targetfile.open(fname);
-    }
-    if (nsolutions>0)
-        cout << "Picking up from solution " << nsolutions-1 << endl;
-    
-
-
-    
-	// Load the input file (to be replaced with something more sophisticated)
-    SCALE_FAC=1.0;
-    
-    beta=beta0;
-    
-    cout << "Checkpoint time = " << mct_schedule << endl;
-    cout << "Cooling rate = " << cooling_rate << " per checkpoint time" << endl;
-    cout << "Hot time = " << hot_time << " MC sweeps" << endl;
-    cout << "Beta=" << beta << ", Beta max = " << betamax << endl;
-    cout << endl;
-    
-    
-
-    
-    
     ///////////////////////////
     ///// INITIALISATION //////
     ///////////////////////////
+
+    // Load the input file (to be replaced with something more sophisticated)
+    SCALE_FAC=1.0;
     
-    
-#ifdef ENERGYBIAS
-    // Collection matrix
-    int nbins=10000;
-    tm = new tmcontinuous(0.0, 10.0, 15, nbins, TM_NO_END_CORRECTION); // note -- you are doing end correction
-#endif
-		
-    // Now set the targets (these will be loaded in eventually)
-    
-    targetfile.open("targets.in");
-    if (targetfile.good())
-    {
-        maxw=0;
-        for (i=0;i<nn;i++)
-        {
-            targetfile >> target_out[i];
-            targetfile >> target_in[i];
-            
-            on_out[i] = on_in[i] = true;
-            if (target_out[i]<=1e-12)
-                on_out[i]=false;
-            if (target_in[i]<=1e-12)
-                on_in[i]=false;
-            
-            if (target_in[i]>maxw)
-                maxw = target_in[i];
-            
-            if (target_out[i]>maxw)
-                maxw = target_out[i];
-            
-            if (!targetfile.good())
-                break;
-        }
-        
-        scalew = maxw;
-        maxw=1.2;
-        minw=0.00001/scalew;
-        
-        targetsread = true;
-        
-        cout << "Max allowed edge weight = " << scalew*maxw << ". Largest target=" << scalew << endl;
-        
-        // Now scale the whole problem
-        for (i=0;i<nn;i++)
-        {
-            target_out[i] /= scalew;
-            target_in[i] /= scalew;
-        }
-    }
-    else
-    {
-        cout << "Problem with targets.in" << endl; exit(1);
-    }
+    beta=beta0;
+
     
 	reset_arrays(); // this function zeroes A, resets W and calculates energy
 
@@ -187,19 +144,8 @@ int dense_hybrid::runjob(int ncycles,
 	move[2] = new move_class("Edge tweak", target_ne*4, 1.0, 0.0000001, 10.0, 0.40);   // Aiming for 40%
     move[3] = new move_class("Edge out rewire", target_ne, 0, 0, 0, 1);        // no step size needed here
     move[4] = new move_class("Edge in rewire", target_ne, 0, 0, 0, 1);        // no step size needed here
-#ifdef MAXEDGES    // In the max edges run we always switch off insertions/deletions and edge moves
+if (MAXEDGES)    // In the max edges run we always switch off insertions/deletions and edge moves
     move[0]->NperMC=move[1]->NperMC=move[3]->NperMC=move[4]->NperMC=0;
-#endif
-    
-    
-    // Clear some files
-    monfile.open("energy.dat"); monfile.close();
-    monfile.open("beta.dat"); monfile.close();
-    monfile.open("step.dat"); monfile.close();
-    monfile.open("success.dat"); monfile.close();
-    monfile.open("ne.dat"); monfile.close();
-    monfile.open("edge_corr.dat"); monfile.close();
-    monfile.open("maxlocal.dat"); monfile.close();
     
     
     ////////////////////////////////////
@@ -209,12 +155,16 @@ int dense_hybrid::runjob(int ncycles,
     
     for (mct=0;mct<ncycles;mct++)
     {
-#ifndef MAXEDGES    // In the max edges run we always switch off insertions/deletions and edge moves
-        if (!goforquench) // restore insertions/deletions
-            move[0]->NperMC=move[1]->NperMC=move[3]->NperMC=move[4]->NperMC=target_ne;
-#else
-        goforquench=true;
-#endif
+        if(!MAXEDGES)    // In the max edges run we always switch off insertions/deletions and edge moves
+        {
+            if (!goforquench) // restore insertions/deletions
+                move[0]->NperMC=move[1]->NperMC=move[3]->NperMC=move[4]->NperMC=target_ne;
+        }
+        else
+        {
+            goforquench=true;
+        }
+
         
         // This tells us how many moves per MC sweep there are in total
         for (moves_perMC=0, j=0;j<Nmoves;j++)
@@ -255,69 +205,46 @@ int dense_hybrid::runjob(int ncycles,
                     
                     if (on_out[i] && on_in[j]) // This stops edges to nodes with a zero in/out sum
                     {
-#ifdef NORETURN
-                        if ((A[j + i*nn] == 0) && (A[i + j*nn] == 0))
-#else
-                        if (A[k] == 0)
-#endif
-                        {
-                            // Calculate the change at the out & in nodes
-                            w = W[k];
+                        int move_succeed=0;
 
-                            deltaE = w*(w - 2*(target_out[i] - sum_out[i]))/pow(top[i],2);    // Out node
-                            deltaE += w*(w - 2*(target_in[j] - sum_in[j]))/pow(tip[j],2);     // In node
-                            
-                            // Now the change in the measure of sparsity
-                            deltaM = 1 - 2*(target_ne - ne);
-                            
-                            // Accept or reject
-                            prob = exp(-beta*(deltaE + mu*deltaM)) * vol / ((double) ne + 1.0);
-#ifdef ENERGYBIAS
-                            // Add to the collection matrix (also returns weight difference)
-                            bias = tm->update_collection_matrix(energy, energy + deltaE, prob);
-                            
-							// Now apply the weight
-                            if (usebias)
-                                prob = exp(-beta*(deltaE + mu*deltaM) + bias ) * vol / ((double) ne + 1.0);
-#endif
-							
-                            if (mt() < prob)
-                            {
-                                // Success!
-                                A[k] = 1;                // switch on the edge
-                                
-                                active_edges[ne] = k;    // Add it to the end of the active list
-                                ne ++;                          // Increment number of edges
-                                
-                                sum_out[i] += w; // update the totals
-                                sum_in[j] += w;
-                                energy += deltaE;
-                                
-                                move[mr]->update_attempts(1); // move sucessful
-                            }
-                            else
-                            {
-                                move[mr]->update_attempts(0); // move unsucessful
-                            }
-                            
-                            
-                        }
-                        else
+                        if (A[k] == 0)
                         {
-#ifdef ENERGYBIAS
-                            // If you proposed a move out of range you still need to update the collection matrix
-                            tm->update_collection_matrix(energy, energy,0);
-#endif
-                            move[mr]->update_attempts(0); // move unsucessful
+                            if (A[j + i*nn] == 0 || !NORETURN)
+                            {
+                                // Calculate the change at the out & in nodes
+                                w = W[k];
+
+                                deltaE = w*(w - 2*(target_out[i] - sum_out[i]))/pow(top[i],2);    // Out node
+                                deltaE += w*(w - 2*(target_in[j] - sum_in[j]))/pow(tip[j],2);     // In node
+                                
+                                // Now the change in the measure of sparsity
+                                deltaM = 1 - 2*(target_ne - ne);
+                                
+                                // Accept or reject
+                                prob = exp(-beta*(deltaE + mu*deltaM)) * vol / ((double) ne + 1.0);
+    							
+                                if (mt() < prob)
+                                {
+                                    // Success!
+                                    A[k] = 1;                // switch on the edge
+                                    
+                                    active_edges[ne] = k;    // Add it to the end of the active list
+                                    ne ++;                          // Increment number of edges
+                                    
+                                    sum_out[i] += w; // update the totals
+                                    sum_in[j] += w;
+                                    energy += deltaE;
+
+                                    move_succeed=1;
+                                    
+                                    
+                                }
+                            }
                         }
+
+                        move[mr]->update_attempts(move_succeed); // move sucessful or not
                     }
-#ifdef ENERGYBIAS
-                    else
-                    {
-                        // If you proposed a move out of range you still need to update the collection matrix
-                        tm->update_collection_matrix(energy, energy,0);
-                    }
-#endif
+
                     
                 }
                     break;
@@ -350,14 +277,6 @@ int dense_hybrid::runjob(int ncycles,
                         // Accept or reject
                         prob = exp(-beta*(deltaE + mu*deltaM)) * ((double) ne) / vol;
                         
-#ifdef ENERGYBIAS
-                        // Add to the collection matrix (also returns weight difference)
-						bias = tm->update_collection_matrix(energy, energy + deltaE, prob);
-						
-						// Now apply the weight
-                        if (usebias)
-                            prob = exp(-beta*(deltaE + mu*deltaM) + bias) * ((double) ne) / vol;
-#endif
                         
                         if (mt() < prob)
                         {
@@ -427,14 +346,7 @@ int dense_hybrid::runjob(int ncycles,
                             
                             // Accept or reject
                             prob = exp(-deltaE*beta);
-#ifdef ENERGYBIAS
-                            // Add to the collection matrix (also returns weight difference)
-                            bias = tm->update_collection_matrix(energy, energy + deltaE, prob);
-                            
-							// Now apply the weight
-                            if (usebias)
-                                prob = exp(-deltaE*beta + bias);
-#endif
+
                             
                             if (mt() < prob)
                             {
@@ -453,10 +365,6 @@ int dense_hybrid::runjob(int ncycles,
                         else
                         {
                             move[mr]->update_attempts(0);
-#ifdef ENERGYBIAS
-                            // If you proposed a move out of range you still need to update the collection matrix
-                            tm->update_collection_matrix(energy, energy,0);
-#endif
                         }
 
                     }
@@ -503,15 +411,6 @@ int dense_hybrid::runjob(int ncycles,
                             
                             // Accept or reject
                             prob = exp(-deltaE*beta);
-#ifdef ENERGYBIAS
-                            // Add to the collection matrix (also returns weight difference)
-                            bias = tm->update_collection_matrix(energy, energy + deltaE, prob);
-                            
-							// Now apply the weight
-                            if (usebias)
-                                prob = exp(-deltaE*beta + bias);
-#endif
-
                             
                             if (mt() < prob)
                             {
@@ -537,10 +436,6 @@ int dense_hybrid::runjob(int ncycles,
                         else
                         {
                             move[mr]->update_attempts(0); // move unsucessful
-#ifdef ENERGYBIAS
-                            // If you proposed a move out of range you still need to update the collection matrix
-                            tm->update_collection_matrix(energy, energy,0);
-#endif
                         }
                         
                     }
@@ -586,14 +481,6 @@ int dense_hybrid::runjob(int ncycles,
                             // Accept or reject
                             prob = exp(-deltaE*beta);
                             
-#ifdef ENERGYBIAS
-                            // Add to the collection matrix (also returns weight difference)
-                            bias = tm->update_collection_matrix(energy, energy + deltaE, prob);
-                            
-							// Now apply the weight
-                            if (usebias)
-                                prob = exp(-deltaE*beta + bias);
-#endif
                             
                             if (mt() < prob)
                             {
@@ -621,10 +508,6 @@ int dense_hybrid::runjob(int ncycles,
                         else
                         {
                             move[mr]->update_attempts(0); // move unsucessful
-#ifdef ENERGYBIAS
-                            // If you proposed a move out of range you still need to update the collection matrix
-                            tm->update_collection_matrix(energy, energy,0);
-#endif
                         }
                         
                     }
@@ -668,62 +551,6 @@ int dense_hybrid::runjob(int ncycles,
                 //cout << total_energy() - energy << endl;
                 energy = total_energy();
 
-                if (mct>1000)
-                {
-                    write_monitor("energy.dat", mct, energy/nn);
-                    write_monitor("beta.dat", mct, beta);
-                    write_monitor("step.dat", mct, move[2]->step);
-                    write_monitor("success.dat", mct, move[2]->success_rate);
-                    write_monitor("ne.dat", mct, (double) ne);
-                }
-				
-				if ((mct%(10*mct_schedule))==0)
-                {
-                    afile.open("adjacency.dat");
-                    for (i=0;i<nn;i++)
-                    {
-                        for (j=0;j<nn;j++)
-                            afile << A[i + j*nn] << " ";
-                        afile << endl;
-                    }
-                    afile.close();
-                    
-                    
-                    wfile.open("weights.dat");
-                    wfile.precision(16);
-                    for (i=0;i<nn;i++)
-                    {
-                        for (j=0;j<nn;j++)
-                            wfile << scalew*W[i + j*nn] << " ";
-                        wfile << endl;
-                    }
-                    wfile.close();
-                    
-                    sfile.open("sumtargets.dat");
-                    sfile.precision(16);
-                    for (i=0;i<nn;i++)
-                        sfile << target_in[i] << " " << sum_in[i] << " " << target_out[i] << " " << sum_out[i] << endl;
-                    sfile.close();
-                    
-                    sfile.open("energybeta.dat");
-                    sfile.precision(16);
-                    temax=0;
-                    for (i=0;i<nn;i++)
-                    {
-                        tenergy=0;
-                        if (target_in[i]>1e-12)
-                            tenergy += pow((target_in[i] - sum_in[i])/tip[i],2);
-                        if (target_out[i]>1e-12)
-                            tenergy += pow((target_out[i] - sum_out[i])/top[i],2);
-
-                         sfile << i << " " << beta*tenergy << endl;
-                        if (tenergy>temax)
-                            temax=tenergy;
-                    }
-                    sfile.close();
-                    write_monitor("maxlocal.dat", mct, temax);
-                }
-
 				
             }
 
@@ -743,31 +570,11 @@ int dense_hybrid::runjob(int ncycles,
 				{
 					cout << "End of hot_time" << endl;
 					energy = total_energy();
-				}
-                
-#ifdef ENERGYBIAS
-                // Kill any collection matrix data we were gathering
-                tm->reset_collection();
-#endif
-                
+				}                
             }
             else
             {
               
-#ifdef ENERGYBIAS
-                // Transition matrix
-                if (mct%(20*mct_schedule)==0 && nrws<10)
-                {
-                    cout << "getting new weights " << nrws << endl;
-                    tm->save_collection("collection.dat");
-                    tm->getlogP();
-                    // Shift weights to zero at the ends
-					tm->zerologPatend();
-                    tm->save_logP("logP.dat");
-                    nrws++;
-                }
-                // End transition matrix
-#endif
    
                 for (k=0, i=0;i<ne0;i++)
                     k += A[active_edges0[i]]; // sum all edges who are still on
@@ -982,7 +789,7 @@ int dense_hybrid::runjob(int ncycles,
 // Conjugate gradient functions
 //////////////////////////////////
 
-void dense_hybrid::reset_arrays()
+void dense_hybrid::reset_arrays(bool MAXEDGES)
 {
     goforquench=false;
     
@@ -1001,25 +808,26 @@ void dense_hybrid::reset_arrays()
         sum_in[i] = 0;
     }
     
-#ifdef MAXEDGES
-    for (int i=0;i<nn;i++)
+    if (MAXEDGES)
     {
-        for (int j=0;j<nn;j++)
+        for (int i=0;i<nn;i++)
         {
-            int k = i + j*nn;   // position in the adjacency and weights matrix
-        
-            if (i!=j && on_out[i] && on_in[j]) // This stops edges to nodes with a zero in/out sum
+            for (int j=0;j<nn;j++)
             {
-                A[k] = 1;               // switch on the edge
-                active_edges[ne] = k;   // Add it to the end of the active list
-                ne ++;                  // Increment number of edges
-                sum_out[i] += W[k];
-                sum_in[j] += W[k];
+                int k = i + j*nn;   // position in the adjacency and weights matrix
+            
+                if (i!=j && on_out[i] && on_in[j]) // This stops edges to nodes with a zero in/out sum
+                {
+                    A[k] = 1;               // switch on the edge
+                    active_edges[ne] = k;   // Add it to the end of the active list
+                    ne ++;                  // Increment number of edges
+                    sum_out[i] += W[k];
+                    sum_in[j] += W[k];
+                }
             }
         }
+        cout << "Max edges filled to ne=" << ne << " edges" << endl;
     }
-    cout << "Max edges filled to ne=" << ne << " edges" << endl;
-#endif
 	
     energy=0;
     for (int i=0;i<nn;i++)
@@ -1256,19 +1064,22 @@ void dense_hybrid::gradient_energy(double *actW, double *xi)
 
 void dense_hybrid::conjugate_gradient()
 {
-    long k,l,iter;
-	double fret;
+ //    long k,l,iter;
+	// double fret;
     
-    // copy weights into activeW
-    for (l=0;l<ne;l++)
-    {
-        k = active_edges[l];     // k is the position in the adjacency and weights matrices
-        activeW[l] = W[k];
-    }
+ //    // copy weights into activeW
+ //    for (l=0;l<ne;l++)
+ //    {
+ //        k = active_edges[l];     // k is the position in the adjacency and weights matrices
+ //        activeW[l] = W[k];
+ //    }
+
+    cout << "Shouldn't get to conjugate gradient" << endl;
+    exit(1);
     
     // Now call the conjugate gradient minimisation routines
 	
-	frprmn(activeW, ne, FTOL, &iter, &fret, energyfunc, gradenergy, cg_g, cg_h, gradW);
+//	frprmn(activeW, ne, FTOL, &iter, &fret, energyfunc, gradenergy, cg_g, cg_h, gradW);
 	
-	cout << "Relaxed to precision FTOL=" << FTOL << " in " << iter << " iterations." << endl;
+//	cout << "Relaxed to precision FTOL=" << FTOL << " in " << iter << " iterations." << endl;
 }

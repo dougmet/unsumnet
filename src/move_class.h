@@ -10,6 +10,8 @@
 #ifndef DOUG_MOVE_CLASS_H
 #define DOUG_MOVE_CLASS_H
 
+ #include <cstring>
+
 class move_class
 	{
 	// The particle class can have as much or as little as you need.
@@ -48,7 +50,6 @@ class move_class
 		
 	};
 
-#include "move_class.cpp"
 
 #endif // header protection
 
