@@ -99,12 +99,11 @@ public:
     int read_input(const char *infilename);
     void create_arrays();
     void initialise_arrays();
-	void reset_arrays();
+    void init_targets();
+	void reset_arrays(bool MAXEDGES);
     double total_energy(double *inW);
     double total_energy();
     bool rowcol_iterate();
-    void gradient_energy(double *inW, double *xi);
-    void conjugate_gradient();
     
 };
 

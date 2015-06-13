@@ -49,7 +49,7 @@ dense_hybrid::dense_hybrid(int nn_in, int target_ne_in)
     gdh=this;
 }
 
-int dense_hybrid::init_targets()
+void dense_hybrid::init_targets()
 {
     // Now set the targets (these will be loaded in eventually)
     maxw=0;
@@ -73,12 +73,10 @@ int dense_hybrid::init_targets()
     maxw=1.2;
     minw=0.00001/scalew;
 
-    targetsread = true;
-
     cout << "Max allowed edge weight = " << scalew*maxw << ". Largest target=" << scalew << endl;
 
     // Now scale the whole problem
-    for (i=0;i<nn;i++)
+    for (int i=0;i<nn;i++)
     {
         target_out[i] /= scalew;
         target_in[i] /= scalew;
@@ -101,20 +99,17 @@ int dense_hybrid::runjob(int ncycles,
 {
     // This function is the main job controller
 
-    long i,j,k,l,iact;                  // general integers
+    long i,j,k,iact;                  // general integers
     int newi,newj,nrn,newk;             // Edge moves
     int ir, mr;                         // for choosing moves
     long mct;                           // Monte Carlo time
     double deltaE, deltaM, w, dw;
-    double r, prob, cg_energy;
-    double tenergy, temax, localmaxw;   // Working numbers
+    double r, prob;
+    double localmaxw;   // Working numbers
 
 	double oldenergy;
 	int nsmallderiv=0;
 	
-    bool targetsread=false;
-	
-	char fname[100];
 	int nsolutions=0;
     
     
@@ -129,7 +124,7 @@ int dense_hybrid::runjob(int ncycles,
     beta=beta0;
 
     
-	reset_arrays(); // this function zeroes A, resets W and calculates energy
+	reset_arrays(MAXEDGES); // this function zeroes A, resets W and calculates energy
 
     
     ////////// MOVES ////////////
@@ -601,7 +596,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
 						beta=beta0;
 						mct=0;
                         nsmallderiv=0;
-						reset_arrays();
+						reset_arrays(MAXEDGES);
                         //						move[0]->NperMC=move[1]->NperMC=target_ne;
 					}
 				}
@@ -610,7 +605,6 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                 if (mct%(50*mct_schedule)==0)
                 {
 
-					
                    // if (energy<nn)
                     if (move[0]->success_rate < 1e-5 && !goforquench)
                     {
@@ -619,7 +613,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                             cout << endl << endl << "Rowcol fail. Restarting quench again" << endl << endl;
                             beta=beta0;
                             mct=0;
-                            reset_arrays();
+                            reset_arrays(MAXEDGES);
                         }
                         else
                         {
@@ -629,18 +623,6 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                                 goforquench=true;
                                 // Switch off insertions/deletions, we'll stick with this config
                                 move[0]->NperMC=move[1]->NperMC=0;
-                                
-//                                cout << "Switching energy scale factor." << endl;
-//                                for (int inn=0;inn<nn;inn++)
-//                                {
-//                                    top[inn] = pow(target_out[inn],SCALE_FAC_DROP);
-//                                    tip[inn] = pow(target_in[inn],SCALE_FAC_DROP);
-//                                }
-//                            
-//                                cout << "Energy from " << energy << flush;
-//                                energy = total_energy();
-//                                cout << " to " << energy << endl;
-//                                beta /= 10;
                             }
                         }
                     }
@@ -663,84 +645,20 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                     /////////////////  FINAL ANSWER ///////////////
                 ///////////////////////////////////////////////////////////
                 
-                // Conjugate gradient
-                if (mct%(50*mct_schedule)==0)
-                if ((energy<cgmax*nn && rowcol_iterate()) || beta>betamax)
+                if (mct%(50*mct_schedule)==0 && energy<cgmax*nn)
                 {
-                    
-                    bool hittarget=false;
-                    
-                    if (energy<CG_TARGET*nn)
+                    if (rowcol_iterate())
                     {
-                        hittarget=true;
-                    }
-                    else
-                    {
-                        conjugate_gradient();
-                        cg_energy = total_energy(activeW);
-                        cout << "cg_energy/nn=" << cg_energy/nn << endl;
-                    
-                        if (cg_energy<CG_TARGET*nn)
-                        {
-                            // check weights
-                            bool allwpos=true;
-                            for (l=0;l<ne;l++)
-                            {
-                                if (activeW[l]<minw)
-                                    cout << "Small edge " << activeW[l] << endl;
-                                
-                                if (activeW[l]<minw*0)
-                                {
-                                    cout << activeW[l] << " ";
-                                    allwpos=false;
-                                    break;
-                                }
-                            }
+                            cout << endl << ">>>>>> hit target " << nsolutions << " >>>>>>" << endl << endl;
+
+                            return(0);
                             
-                            if (allwpos)
-                            {
-                                hittarget=true;
-                                
-                                // copy weights
-                                for (l=0;l<ne;l++)
-                                {
-                                    k = active_edges[l];
-                                    W[k] = activeW[l];
-                                }
-                            }
-                            else
-                            {
-                                cout << endl << "Invalid solution. Keep cooling." << endl;
-                            }
-                                
-                        }
                     }
-                    
-                                            
-                        cout << endl << ">>>>>> hit target " << nsolutions << " >>>>>>" << endl << endl;
-
-                        return(0);
-                        
-                    }
-
                 }
 
-				
-				
-            }
-            
+            } // hot time if
 
-            
-            
-                        
-            
-//            if (energy<1e-5)
-//            {
-//                cout << "hit energy target by MC, E/n=" << energy/nn << " " << total_energy()/nn << endl;
-//                exit(0);
-//            }
-
-        }
+        } // mct_schedule if
         
     } // end mct loop
     
@@ -806,15 +724,6 @@ void dense_hybrid::reset_arrays(bool MAXEDGES)
     cout << "Energy(0)=" << energy << endl;
 }
 
-void gradenergy(double *p, double *xi)
-{
-    gdh->gradient_energy(p,xi);
-}
-
-double energyfunc(double *p)
-{
-    return(gdh->total_energy(p));
-}
 
 double dense_hybrid::total_energy()
 {
@@ -985,66 +894,4 @@ double dense_hybrid::total_energy(double *actW)
     
     return(tenergy);
     
-}
-
-void dense_hybrid::gradient_energy(double *actW, double *xi)
-{
-    // actW is a smaller array with only active weights
-    
-    int i,j,k, l;
-    
-    // Calculate all the node in/out sums
-    // DO WE NEED TO DO THIS IF WE'RE DOING IT IN THE ENERGY? CHECK minimise.cpp
-    for (l=0; l<nn; l++)
-        cg_sum_in[l] = cg_sum_out[l]=0; // clear the sums
-    
-    for (l=0;l<ne;l++)
-    {
-        k = active_edges[l];     // k is the position in the adjacency and weights matrices
-        
-        // Resolve this into the from (i) and to edge (j)
-        j = k/nn;
-        i = k - j*nn;
-        
-        cg_sum_out[i] += actW[l];
-        cg_sum_in[j] += actW[l];
-    }
-    
-    // Now work out the gradients
-    for (l=0;l<ne;l++)
-    {
-        k = active_edges[l];     // k is the position in the adjacency and weights matrices
-        
-        // Resolve this into the from (i) and to edge (j)
-        j = k/nn;
-        i = k - j*nn;
-        
-        xi[l]=0;
-        if (target_out[i]>1e-12)
-            xi[l] = -2*((target_out[i] - cg_sum_out[i])/pow(top[i],2))*actW[l];
-        if (target_in[j]>1e-12)
-            xi[l] += -2*((target_in[j] - cg_sum_in[j])/pow(tip[j],2))*actW[l];
-    }
-}
-
-void dense_hybrid::conjugate_gradient()
-{
- //    long k,l,iter;
-	// double fret;
-    
- //    // copy weights into activeW
- //    for (l=0;l<ne;l++)
- //    {
- //        k = active_edges[l];     // k is the position in the adjacency and weights matrices
- //        activeW[l] = W[k];
- //    }
-
-    cout << "Shouldn't get to conjugate gradient" << endl;
-    exit(1);
-    
-    // Now call the conjugate gradient minimisation routines
-	
-//	frprmn(activeW, ne, FTOL, &iter, &fret, energyfunc, gradenergy, cg_g, cg_h, gradW);
-	
-//	cout << "Relaxed to precision FTOL=" << FTOL << " in " << iter << " iterations." << endl;
 }
