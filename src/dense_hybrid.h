@@ -29,14 +29,6 @@ using namespace std;
 
 
 
-void write_monitor(const char *filename, long t, double data)
-{
-    ofstream monfile;
-    monfile.open(filename, ios::app);
-    monfile << t << " " << data << endl;
-    monfile.close();
-}
-
 class dense_hybrid
 {
     
@@ -90,12 +82,13 @@ public:
     ~dense_hybrid();
     
     int runjob(long  mct_schedule,
-                long  hot_time,
-                double beta0,
-                double betamax,
-                double cooling_rate,
-                long max_time,
-                double cgmax);
+               long  hot_time,
+               double beta0,
+               double betamax,
+               double mu0,
+               double cooling_rate,
+               long max_time,
+               double cgmax);
 
     int read_input(const char *infilename);
     void create_arrays();

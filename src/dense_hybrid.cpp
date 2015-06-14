@@ -20,9 +20,9 @@ dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
     // To get element A_ij address A[i + j*nn]
     A = new int [nn*nn];
     W = new double [nn*nn];
-    active_edges = new long [target_ne*2];            // first ne elements give active edges
+    active_edges = new long [target_ne*2];     // first ne elements give active edges
     active_edges0 = new long [target_ne*2];    // For correlation functions
-    vol = nn*(nn-1);                            // total number of possible edges
+    vol = nn*(nn-1);                           // total number of possible edges
     
     // These arrays store node properties
     target_out = new double [nn];
@@ -43,11 +43,6 @@ dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
     cg_sum_out = new double [nn];
     cg_sum_in = new double [nn];
     
- //   // how many bloody arrays could it need?
- //   pcom = new double [target_ne*2];
- //   xicom = new double [target_ne*2];
- //   
- //   ncom = target_ne*2;
     
 }
 
@@ -73,23 +68,23 @@ dense_hybrid::~dense_hybrid()
     delete cg_sum_in;
 }
 
-void dense_hybrid::init_targets()
+void dense_hybrid::init_targets(double * i_target_out, double * i_target_in)
 {
-    // Now set the targets (these will be loaded in eventually)
+    // Find maximum and find which nodes have no out/in going edges
     maxw=0;
     for (int i=0;i<nn;i++)
     {
         on_out[i] = on_in[i] = true;
-        if (target_out[i]<=1e-12)
+        if (i_target_out[i]<=1e-12)
             on_out[i]=false;
-        if (target_in[i]<=1e-12)
+        if (i_target_in[i]<=1e-12)
             on_in[i]=false;
         
-        if (target_in[i]>maxw)
-            maxw = target_in[i];
+        if (i_target_in[i]>maxw)
+            maxw = i_target_in[i];
         
-        if (target_out[i]>maxw)
-            maxw = target_out[i];
+        if (i_target_out[i]>maxw)
+            maxw = i_target_out[i];
         
     }
 
@@ -97,13 +92,11 @@ void dense_hybrid::init_targets()
     maxw=1.2;
     minw=0.00001/scalew;
 
-    cout << "Max allowed edge weight = " << scalew*maxw << ". Largest target=" << scalew << endl;
-
     // Now scale the whole problem
     for (int i=0;i<nn;i++)
     {
-        target_out[i] /= scalew;
-        target_in[i] /= scalew;
+        target_out[i] = i_target_out[i] / scalew;
+        target_in[i] = i_target_in[i] / scalew;
     }
 
 }
@@ -112,6 +105,7 @@ int dense_hybrid::runjob(long  mct_schedule,
                          long  hot_time,
                          double beta0,
                          double betamax,
+                         double mu0,
                          double cooling_rate,
                          long max_time,
                          double cgmax)
@@ -130,7 +124,7 @@ int dense_hybrid::runjob(long  mct_schedule,
     SCALE_FAC=1.0;
     
     beta=beta0;
-    
+    mu=mu0;
 	reset_arrays(MAXEDGES); // this function zeroes A, resets W and calculates energy
 
     
