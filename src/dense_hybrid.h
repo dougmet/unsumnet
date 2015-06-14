@@ -3,6 +3,11 @@
 #ifndef DENSE_HYBRID_H // header protection
 #define DENSE_HYBRID_H
 
+#define DH_SUCCESS 0
+#define DH_FAIL_TIME_OUT 1
+#define DH_FAIL_PLATEAU 2
+#define DH_FAIL_ROWCOL 3
+
 // This code is for dense graphs so we have the entire adjancy matrix
 
 #include <iostream>
@@ -19,12 +24,6 @@ using namespace std;
 //#define ITMAX 100000
 #define ITMAX 10000
 
-
-#ifdef ENERGYBIAS
-  #include "tmclass.h"
-#endif 
-
-//#include "minimise.cpp" // No conjugate gradient for now
 
 #include "move_class.h"
 
@@ -80,21 +79,23 @@ public:
     double beta, mu;        // fields for energy and ne (beta is inverse temperature, beta=1/T)
     double cooling_rate;
     
+    bool MAXEDGES;          // If this is true then all possible edges are always on
+    bool NORETURN;          // If this is true then no return edges are allowed.
     
     ////////// METHODS (AKA FUNCTIONS) //////////
-    dense_hybrid(int nn_in, int target_ne_in); // constructor
-    int runjob(int ncycles,
-                long  mct_schedule,
+    dense_hybrid(int nn_in, int target_ne_in,
+                 bool inMAXEDGES,
+                 bool inNORETURN); // constructor
+    
+    ~dense_hybrid();
+    
+    int runjob(long  mct_schedule,
                 long  hot_time,
                 double beta0,
                 double betamax,
-                double mu,
                 double cooling_rate,
                 long max_time,
-                double cgmax, // when to attempt conjugate gradient
-                double CG_TARGET,
-                bool MAXEDGES,
-                bool NORETURN);
+                double cgmax);
 
     int read_input(const char *infilename);
     void create_arrays();
@@ -104,6 +105,8 @@ public:
     double total_energy(double *inW);
     double total_energy();
     bool rowcol_iterate();
+    
+    int mc_sweep(move_class ** move, int Nmoves);
     
 };
 

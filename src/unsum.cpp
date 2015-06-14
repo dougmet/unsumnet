@@ -6,18 +6,25 @@ using namespace Rcpp;
 // the simulations, extracting the results and sending back to R.
 
 // [[Rcpp::export]]
-int unsumcpp(int awhole,
-             int ton,
-             double of,
-             double variables)
+int unsumcpp(NumericMatrix constraints,
+             long  mct_schedule,
+             long  hot_time,
+             double beta0,
+             double betamax,
+             double cooling_rate,
+             long max_time,
+             double cgmax)
 {
     
     dense_hybrid *dh; // everything happens in this object
     
     dh = new dense_hybrid(nn, target_ne);
-    gdh = dh; // global pointer
     
-    dh->runjob(awhole, ton, of, variables);
+    // Copy in the constraints to the targets
+    
+    // You'll need to do this a lot more than once
+    dh->runjob(ncycles, mct_schedule, hot_time, beta0, betamax, cooling_rate,
+               max_time, cgmax);
     
     delete dh;
 

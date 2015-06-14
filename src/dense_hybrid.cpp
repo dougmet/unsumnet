@@ -1,12 +1,15 @@
 #include "dense_hybrid.h"
 
-dense_hybrid *gdh;
-
-dense_hybrid::dense_hybrid(int nn_in, int target_ne_in)
+dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
+                           bool inMAXEDGES,
+                           bool inNORETURN)
 {
     ///////////////////////////
     //// CREATE THE ARRAYS ////
     ///////////////////////////
+    
+    MAXEDGES = inMAXEDGES;
+    NORETURN = inNORETURN;
     
     nn = nn_in;
     target_ne = target_ne_in;
@@ -46,7 +49,28 @@ dense_hybrid::dense_hybrid(int nn_in, int target_ne_in)
  //   
  //   ncom = target_ne*2;
     
-    gdh=this;
+}
+
+dense_hybrid::~dense_hybrid()
+{
+    delete A;
+    delete W;
+    delete active_edges;
+    delete active_edges0;
+    delete target_out;
+    delete target_in;
+    delete sum_out;
+    delete sum_in;
+    delete on_out;
+    delete on_in;
+    delete top;
+    delete tip;
+    delete activeW;
+    delete gradW;
+    delete cg_g;
+    delete cg_h;
+    delete cg_sum_out;
+    delete cg_sum_in;
 }
 
 void dense_hybrid::init_targets()
@@ -84,45 +108,28 @@ void dense_hybrid::init_targets()
 
 }
 
-int dense_hybrid::runjob(int ncycles,
-                         long  mct_schedule,
+int dense_hybrid::runjob(long  mct_schedule,
                          long  hot_time,
                          double beta0,
                          double betamax,
-                         double mu,
                          double cooling_rate,
                          long max_time,
-                         double cgmax, // when to attempt conjugate gradient
-                         double CG_TARGET,
-                         bool MAXEDGES,
-                         bool NORETURN)
+                         double cgmax)
 {
     // This function is the main job controller
 
-    long i,j,k,iact;                  // general integers
-    int newi,newj,nrn,newk;             // Edge moves
-    int ir, mr;                         // for choosing moves
     long mct;                           // Monte Carlo time
-    double deltaE, deltaM, w, dw;
-    double r, prob;
-    double localmaxw;   // Working numbers
+    int nsmallderiv=0;
+    double oldenergy=1;
 
-	double oldenergy;
-	int nsmallderiv=0;
-	
-	int nsolutions=0;
-    
-    
 
     ///////////////////////////
     ///// INITIALISATION //////
     ///////////////////////////
-
-    // Load the input file (to be replaced with something more sophisticated)
+    
     SCALE_FAC=1.0;
     
     beta=beta0;
-
     
 	reset_arrays(MAXEDGES); // this function zeroes A, resets W and calculates energy
 
@@ -130,7 +137,6 @@ int dense_hybrid::runjob(int ncycles,
     ////////// MOVES ////////////
 	// Setup the moves we'll use
     const int Nmoves = 5;
-    int moves_perMC, sum_moves;
     move_class *move[Nmoves];
     
     // Initialise the moves
@@ -161,368 +167,16 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
             goforquench=true;
         }
 
+        ////////////////////////////
+        ////    MAIN MC LOOP    ////
+        ////////////////////////////
         
-        // This tells us how many moves per MC sweep there are in total
-        for (moves_perMC=0, j=0;j<Nmoves;j++)
-            moves_perMC += move[j]->NperMC;
+        mc_sweep(move, Nmoves);
+    
         
-        //// BEGIN MONTE CARLO SWEEP ////
-        for (int im=0;im<moves_perMC;im++)
-        {
-            
-            // Choose a move (with replacement)
-			ir = mt.randInt(moves_perMC-1);     // pick a number from the total number
-			for (sum_moves=0, mr=0; mr<Nmoves; mr++)
-			{
-				sum_moves+=move[mr]->NperMC;
-				if (ir < sum_moves)
-					break;
-			}
-            // when you get here mr corresponds to the move index
-            
-			switch (mr)
-			{
-                case 0:
-				{
-                    ////// EDGE INSERTION //////
-                    
-                    // Choose random edge
-                    i = mt.randInt(nn-1); // from i
-                    do {
-                        j = mt.randInt(nn-1); // to j
-                    } while (j==i); // no self loops
-                    
-                    k = i + j*nn;   // position in the adjacency and weights matrix
-                    
-                    
-                    // We need to check if the edge and the edge going the other way is on
-                    // Not allowing loops length 2 at the moment.
-                    //if (A[k] == 0)
-                    
-                    if (on_out[i] && on_in[j]) // This stops edges to nodes with a zero in/out sum
-                    {
-                        int move_succeed=0;
-
-                        if (A[k] == 0)
-                        {
-                            if (A[j + i*nn] == 0 || !NORETURN)
-                            {
-                                // Calculate the change at the out & in nodes
-                                w = W[k];
-
-                                deltaE = w*(w - 2*(target_out[i] - sum_out[i]))/pow(top[i],2);    // Out node
-                                deltaE += w*(w - 2*(target_in[j] - sum_in[j]))/pow(tip[j],2);     // In node
-                                
-                                // Now the change in the measure of sparsity
-                                deltaM = 1 - 2*(target_ne - ne);
-                                
-                                // Accept or reject
-                                prob = exp(-beta*(deltaE + mu*deltaM)) * vol / ((double) ne + 1.0);
-    							
-                                if (mt() < prob)
-                                {
-                                    // Success!
-                                    A[k] = 1;                // switch on the edge
-                                    
-                                    active_edges[ne] = k;    // Add it to the end of the active list
-                                    ne ++;                          // Increment number of edges
-                                    
-                                    sum_out[i] += w; // update the totals
-                                    sum_in[j] += w;
-                                    energy += deltaE;
-
-                                    move_succeed=1;
-                                    
-                                    
-                                }
-                            }
-                        }
-
-                        move[mr]->update_attempts(move_succeed); // move sucessful or not
-                    }
-
-                    
-                }
-                    break;
-                    
-                case 1:
-				{
-					///// EDGE DELETION //////
-                    
-                    if (ne>0)
-                    {
-                        // Choose random edge from the active list
-                        iact = mt.randInt(ne-1);    // iact is the position in the active list
-                        k = active_edges[iact];     // k is the position in the adjacency and weights matrices
-                        
-                        // Resolve this into the from (i) and to edge (j)
-                        j = k/nn;
-                        i = k - j*nn;
-                        
-                        // What's the edge weight for the chosen edge
-                        w = W[k];
-                        
-                        // Calculate how this will change the energies
-                        deltaE = w*(w + 2*(target_out[i] - sum_out[i]))/pow(top[i],2);    // Out node
-                        deltaE += w*(w + 2*(target_in[j] - sum_in[j]))/pow(tip[j],2);     // In node
-                        
-                        // Now the change in the measure of sparsity
-                        deltaM = 1 + 2*(target_ne - ne);
-                        
-                        
-                        // Accept or reject
-                        prob = exp(-beta*(deltaE + mu*deltaM)) * ((double) ne) / vol;
-                        
-                        
-                        if (mt() < prob)
-                        {
-														
-                            // Success!
-                            A[k] = 0;                               // Switch off the edge
-                            active_edges[iact]=active_edges[ne-1];  // Replace the entry in the active list with the one at the end
-                            ne --;                                  // Decrement the number of edges
-                            
-                            sum_out[i] -= w; // update the totals
-                            sum_in[j] -= w;
-                            
-                            energy += deltaE;
-                            
-                            move[mr]->update_attempts(1); // Move sucessful
-                        }
-                        else
-                        {
-                            move[mr]->update_attempts(0); // Move unsuccessful
-                        }
-                        
-                    }
-					
-                    
-				}
-					break;
-                    
-				case 2:
-				{
-					///// EDGE TWEAK //////
-                    
-                    if (ne>0)
-                    {
-                        // Choose random edge from the active list
-                        iact = mt.randInt(ne-1);    // iact is the position in the active list
-                        k = active_edges[iact];     // k is the position in the adjacency and weights matrices
-						
-                        // Resolve this into the from (i) and to edge (j)
-                        j = k/nn;
-                        i = k - j*nn;
-                        
-                        r = move[mr]->step*(1.0 - 2*mt());    // evenly distributed on +/- stepsize
-                        
-                        if (target_out[i]>target_in[j])
-                            localmaxw=1.2*target_in[j];
-                        else
-                            localmaxw=1.2*target_out[i];
-
-                        dw = r*localmaxw;
-                        
-//                        if (mt.randInt(1))
-//                            dw = r*target_in[j];                  // in W
-//                        else
-//                            dw = r*target_out[i];                  // in W
-
-                        
-                        //r = exp(r);                         // random walk in log(W)
-                        //dw = W[k]*(r-1);                    // random walk in W
-                        
-
-                        
-                        //if ((W[k] + dw > minw) && (W[k] + dw < maxw))
-                        if ((W[k] + dw > minw) && (W[k] + dw < localmaxw))
-                        {
-                            deltaE = dw*(dw - 2*(target_out[i] - sum_out[i]))/pow(top[i],2);    // Out node
-                            deltaE += dw*(dw - 2*(target_in[j] - sum_in[j]))/pow(tip[j],2);     // In node
-                            
-                            // Accept or reject
-                            prob = exp(-deltaE*beta);
-
-                            
-                            if (mt() < prob)
-                            {
-                                W[k] += dw;
-                                sum_out[i] += dw;
-                                sum_in[j] += dw;
-                                energy += deltaE;
-                                move[mr]->update_attempts(1); // move sucessful
-								
-                            }
-                            else
-                            {
-                                move[mr]->update_attempts(0); // move unsucessful
-                            }
-                        }
-                        else
-                        {
-                            move[mr]->update_attempts(0);
-                        }
-
-                    }
-                    
-                    
-				}
-					break;
-                    
-                case 3:
-                {
-                    ///////// REWIRE OUT EDGE /////////
-                    
-                    if (ne>0)
-                    {
-                        // Choose random edge from the active list
-                        iact = mt.randInt(ne-1);    // iact is the position in the active list
-                        k = active_edges[iact];     // k is the position in the adjacency and weights matrices
-                        
-                        // Resolve this into the from (i) and to edge (j)
-                        j = k/nn;
-                        i = k - j*nn;
-                        
-                        // What's the edge weight for the chosen edge
-                        w = W[k];
-                        
-                        // Now choose another node to wire to
-                        nrn=0;
-                        do {
-                            newj = mt.randInt(nn-1);
-                            nrn++;
-                            // Must not be on, self looping or deactivated
-                        } while ((newj==i || newj==j || (!on_in[newj]) || A[i + newj*nn]) && (nrn<nn));
-                        
-                        if (target_out[i]>target_in[newj])
-                            localmaxw=1.2*target_in[newj];
-                        else
-                            localmaxw=1.2*target_out[i];
-                        
-                        if (nrn<nn && w<localmaxw)
-                        {
-                        
-                            deltaE = w*(w - 2*(target_in[newj] - sum_in[newj]))/pow(tip[newj],2);   // New in node
-                            deltaE += w*(w + 2*(target_in[j] - sum_in[j]))/pow(tip[j],2);           // Old in node
-                            
-                            // Accept or reject
-                            prob = exp(-deltaE*beta);
-                            
-                            if (mt() < prob)
-                            {
-                                sum_in[j] -= w;
-                                sum_in[newj] += w;
-                                energy += deltaE;
-                                move[mr]->update_attempts(1); // move sucessful
-                                newk = i + newj*nn;
-                                // Swap the edge weights around
-                                W[k] = W[newk];
-                                W[newk] = w;
-                                A[k] = 0;
-                                A[newk]=1;
-                                // Update active list
-                                active_edges[iact] = newk;
-                                
-                            }
-                            else
-                            {
-                                move[mr]->update_attempts(0); // move unsucessful
-                            }
-                        }
-                        else
-                        {
-                            move[mr]->update_attempts(0); // move unsucessful
-                        }
-                        
-                    }
-                    
-                }
-                    break;
-                    
-                case 4:
-                {
-                    ///////// REWIRE IN EDGE /////////
-                    
-                    if (ne>0)
-                    {
-                        // Choose random edge from the active list
-                        iact = mt.randInt(ne-1);    // iact is the position in the active list
-                        k = active_edges[iact];     // k is the position in the adjacency and weights matrices
-                        
-                        // Resolve this into the from (i) and to edge (j)
-                        j = k/nn;
-                        i = k - j*nn;
-                        
-                        // What's the edge weight for the chosen edge
-                        w = W[k];
-                        
-                        // Now choose another node to wire to
-                        nrn=0;
-                        do {
-                            newi = mt.randInt(nn-1);
-                            nrn++;
-                            // Must not be on, self looping or deactivated
-                        } while ((newi==j || newi==i || (!on_out[newi]) || A[newi + j*nn]) && (nrn<nn));
-                        
-                        if (target_out[newi]>target_in[j])
-                            localmaxw=1.2*target_in[j];
-                        else
-                            localmaxw=1.2*target_out[newi];
-                        
-                        if (nrn<nn && w<localmaxw)
-                        {
-                            deltaE = w*(w + 2*(target_out[i] - sum_out[i]))/pow(top[i],2);          // Old out node
-                            deltaE += w*(w - 2*(target_out[newi] - sum_out[newi]))/pow(top[newi],2);// New out node
-                            
-                            // Accept or reject
-                            prob = exp(-deltaE*beta);
-                            
-                            
-                            if (mt() < prob)
-                            {
-
-                                
-                                sum_out[i] -= w;
-                                sum_out[newi] += w;
-                                energy += deltaE;
-                                move[mr]->update_attempts(1); // move sucessful
-                                newk = newi + j*nn;
-                                // Swap the edge weights around
-                                W[k] = W[newk];
-                                W[newk] = w;
-                                A[k] = 0;
-                                A[newk]=1;
-                                // Update active list
-                                active_edges[iact] = newk;
-                                
-                            }
-                            else
-                            {
-                                move[mr]->update_attempts(0); // move unsucessful
-                            }
-                        }
-                        else
-                        {
-                            move[mr]->update_attempts(0); // move unsucessful
-                        }
-                        
-                    }
-                    
-                }
-                    break;
-
-                    
-            } // END SWITCH
-            
-            
-        }
-        //// END OF MONTE CARLO SWEEP ////
-
-        
-        
-         ///////////////////////////////////////////////////////////
-                        //// MEASUREMENTS ////
-         ///////////////////////////////////////////////////////////
+        ////////////////////////////
+        ////    MEASUREMENTS    ////
+        ////////////////////////////
         
         if ((mct%mct_schedule)==0)
         {
@@ -536,7 +190,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
             }
             
             // Update the step sizes based on the acceptance rate
-            for (mr=0;mr<Nmoves;mr++)
+            for (int mr=0;mr<Nmoves;mr++)
 				move[mr]->update_step();
             
 			if ((mct%(10*mct_schedule))==0)
@@ -550,16 +204,15 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
 				
             }
 
-            
-            ///////////////////////////////////////////////////////////
-                /////////////////  QUENCH CONTROL ///////////////
-            ///////////////////////////////////////////////////////////
+            ////////////////////////////
+            ////   QUENCH CONTROL   ////
+            ////////////////////////////
             
             if (mct<=hot_time)
             {
                 // Save a list of who is switched on before we start cooling
                 ne0=ne;
-                for (i=0;i<ne;i++)
+                for (int i=0;i<ne;i++)
                     active_edges0[i]=active_edges[i];
 				
 				if (mct==hot_time)
@@ -571,7 +224,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
             else
             {
               
-   
+                int i,k;
                 for (k=0, i=0;i<ne0;i++)
                     k += A[active_edges0[i]]; // sum all edges who are still on
                 write_monitor("edge_corr.dat", mct, ((double) k)/ne0);
@@ -585,19 +238,9 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
 						nsmallderiv=0;
 					oldenergy=energy;
 					
-					//if (mct>max_time || (nsmallderiv>20 && beta>10000))
-					if (mct>max_time || nsmallderiv>10)
+					if (nsmallderiv>10)
 					{
-                        if (mct>max_time)
-                            cout << endl << endl << "Gone over max time.";
-                        else
-                            cout << endl << endl << "Energy plateaued.";
-						cout << ".... Restarting quench again" << endl << endl;
-						beta=beta0;
-						mct=0;
-                        nsmallderiv=0;
-						reset_arrays(MAXEDGES);
-                        //						move[0]->NperMC=move[1]->NperMC=target_ne;
+                        return(DH_FAIL_PLATEAU);
 					}
 				}
 				
@@ -610,10 +253,8 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                     {
                         if (!rowcol_iterate())
                         {
-                            cout << endl << endl << "Rowcol fail. Restarting quench again" << endl << endl;
-                            beta=beta0;
-                            mct=0;
-                            reset_arrays(MAXEDGES);
+                            // This structure cannot work
+                            return(DH_FAIL_ROWCOL);
                         }
                         else
                         {
@@ -641,18 +282,15 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                 }
                 
                 
-                ///////////////////////////////////////////////////////////
-                    /////////////////  FINAL ANSWER ///////////////
-                ///////////////////////////////////////////////////////////
+                ////////////////////////////
+                ////    FINAL ANSWER?   ////
+                ////////////////////////////
                 
                 if (mct%(50*mct_schedule)==0 && energy<cgmax*nn)
                 {
                     if (rowcol_iterate())
                     {
-                            cout << endl << ">>>>>> hit target " << nsolutions << " >>>>>>" << endl << endl;
-
-                            return(0);
-                            
+                        return(DH_SUCCESS);
                     }
                 }
 
@@ -662,10 +300,386 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
         
     } // end mct loop
     
-    
-	return 0;
+    // Hit the buffers without success
+	return (DH_FAIL_TIME_OUT);
 }
 
+
+//////////////////////////////////
+//      Monte Carlo Sweep       //
+//////////////////////////////////
+
+int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
+{
+    
+    int moves_perMC, sum_moves;
+    long i,j,k,iact;                  // general integers
+    int newi,newj,nrn,newk;             // Edge moves
+    int ir, mr;                         // for choosing moves
+    double deltaE, deltaM, w, dw;
+    double r, prob;
+    double localmaxw;   // Working numbers
+    
+    
+    // This tells us how many moves per MC sweep there are in total
+    for (moves_perMC=0, j=0;j<Nmoves;j++)
+        moves_perMC += move[j]->NperMC;
+    
+    //// BEGIN MONTE CARLO SWEEP ////
+    for (int im=0;im<moves_perMC;im++)
+    {
+        
+        // Choose a move (with replacement)
+        ir = mt.randInt(moves_perMC-1);     // pick a number from the total number
+        for (sum_moves=0, mr=0; mr<Nmoves; mr++)
+        {
+            sum_moves+=move[mr]->NperMC;
+            if (ir < sum_moves)
+                break;
+        }
+        // when you get here mr corresponds to the move index
+        
+        switch (mr)
+        {
+            case 0:
+            {
+                ////// EDGE INSERTION //////
+                
+                // Choose random edge
+                i = mt.randInt(nn-1); // from i
+                do {
+                    j = mt.randInt(nn-1); // to j
+                } while (j==i); // no self loops
+                
+                k = i + j*nn;   // position in the adjacency and weights matrix
+                
+                
+                // We need to check if the edge and the edge going the other way is on
+                // Not allowing loops length 2 at the moment.
+                //if (A[k] == 0)
+                
+                if (on_out[i] && on_in[j]) // This stops edges to nodes with a zero in/out sum
+                {
+                    int move_succeed=0;
+                    
+                    if (A[k] == 0)
+                    {
+                        if (A[j + i*nn] == 0 || !NORETURN)
+                        {
+                            // Calculate the change at the out & in nodes
+                            w = W[k];
+                            
+                            deltaE = w*(w - 2*(target_out[i] - sum_out[i]))/pow(top[i],2);    // Out node
+                            deltaE += w*(w - 2*(target_in[j] - sum_in[j]))/pow(tip[j],2);     // In node
+                            
+                            // Now the change in the measure of sparsity
+                            deltaM = 1 - 2*(target_ne - ne);
+                            
+                            // Accept or reject
+                            prob = exp(-beta*(deltaE + mu*deltaM)) * vol / ((double) ne + 1.0);
+                            
+                            if (mt() < prob)
+                            {
+                                // Success!
+                                A[k] = 1;                // switch on the edge
+                                
+                                active_edges[ne] = k;    // Add it to the end of the active list
+                                ne ++;                          // Increment number of edges
+                                
+                                sum_out[i] += w; // update the totals
+                                sum_in[j] += w;
+                                energy += deltaE;
+                                
+                                move_succeed=1;
+                                
+                                
+                            }
+                        }
+                    }
+                    
+                    move[mr]->update_attempts(move_succeed); // move sucessful or not
+                }
+                
+                
+            }
+                break;
+                
+            case 1:
+            {
+                ///// EDGE DELETION //////
+                
+                if (ne>0)
+                {
+                    // Choose random edge from the active list
+                    iact = mt.randInt(ne-1);    // iact is the position in the active list
+                    k = active_edges[iact];     // k is the position in the adjacency and weights matrices
+                    
+                    // Resolve this into the from (i) and to edge (j)
+                    j = k/nn;
+                    i = k - j*nn;
+                    
+                    // What's the edge weight for the chosen edge
+                    w = W[k];
+                    
+                    // Calculate how this will change the energies
+                    deltaE = w*(w + 2*(target_out[i] - sum_out[i]))/pow(top[i],2);    // Out node
+                    deltaE += w*(w + 2*(target_in[j] - sum_in[j]))/pow(tip[j],2);     // In node
+                    
+                    // Now the change in the measure of sparsity
+                    deltaM = 1 + 2*(target_ne - ne);
+                    
+                    
+                    // Accept or reject
+                    prob = exp(-beta*(deltaE + mu*deltaM)) * ((double) ne) / vol;
+                    
+                    
+                    if (mt() < prob)
+                    {
+                        
+                        // Success!
+                        A[k] = 0;                               // Switch off the edge
+                        active_edges[iact]=active_edges[ne-1];  // Replace the entry in the active list with the one at the end
+                        ne --;                                  // Decrement the number of edges
+                        
+                        sum_out[i] -= w; // update the totals
+                        sum_in[j] -= w;
+                        
+                        energy += deltaE;
+                        
+                        move[mr]->update_attempts(1); // Move sucessful
+                    }
+                    else
+                    {
+                        move[mr]->update_attempts(0); // Move unsuccessful
+                    }
+                    
+                }
+                
+                
+            }
+                break;
+                
+            case 2:
+            {
+                ///// EDGE TWEAK //////
+                
+                if (ne>0)
+                {
+                    // Choose random edge from the active list
+                    iact = mt.randInt(ne-1);    // iact is the position in the active list
+                    k = active_edges[iact];     // k is the position in the adjacency and weights matrices
+                    
+                    // Resolve this into the from (i) and to edge (j)
+                    j = k/nn;
+                    i = k - j*nn;
+                    
+                    r = move[mr]->step*(1.0 - 2*mt());    // evenly distributed on +/- stepsize
+                    
+                    if (target_out[i]>target_in[j])
+                        localmaxw=1.2*target_in[j];
+                    else
+                        localmaxw=1.2*target_out[i];
+                    
+                    dw = r*localmaxw;
+                    
+                    //                        if (mt.randInt(1))
+                    //                            dw = r*target_in[j];                  // in W
+                    //                        else
+                    //                            dw = r*target_out[i];                  // in W
+                    
+                    
+                    //r = exp(r);                         // random walk in log(W)
+                    //dw = W[k]*(r-1);                    // random walk in W
+                    
+                    
+                    
+                    //if ((W[k] + dw > minw) && (W[k] + dw < maxw))
+                    if ((W[k] + dw > minw) && (W[k] + dw < localmaxw))
+                    {
+                        deltaE = dw*(dw - 2*(target_out[i] - sum_out[i]))/pow(top[i],2);    // Out node
+                        deltaE += dw*(dw - 2*(target_in[j] - sum_in[j]))/pow(tip[j],2);     // In node
+                        
+                        // Accept or reject
+                        prob = exp(-deltaE*beta);
+                        
+                        
+                        if (mt() < prob)
+                        {
+                            W[k] += dw;
+                            sum_out[i] += dw;
+                            sum_in[j] += dw;
+                            energy += deltaE;
+                            move[mr]->update_attempts(1); // move sucessful
+                            
+                        }
+                        else
+                        {
+                            move[mr]->update_attempts(0); // move unsucessful
+                        }
+                    }
+                    else
+                    {
+                        move[mr]->update_attempts(0);
+                    }
+                    
+                }
+                
+                
+            }
+                break;
+                
+            case 3:
+            {
+                ///////// REWIRE OUT EDGE /////////
+                
+                if (ne>0)
+                {
+                    // Choose random edge from the active list
+                    iact = mt.randInt(ne-1);    // iact is the position in the active list
+                    k = active_edges[iact];     // k is the position in the adjacency and weights matrices
+                    
+                    // Resolve this into the from (i) and to edge (j)
+                    j = k/nn;
+                    i = k - j*nn;
+                    
+                    // What's the edge weight for the chosen edge
+                    w = W[k];
+                    
+                    // Now choose another node to wire to
+                    nrn=0;
+                    do {
+                        newj = mt.randInt(nn-1);
+                        nrn++;
+                        // Must not be on, self looping or deactivated
+                    } while ((newj==i || newj==j || (!on_in[newj]) || A[i + newj*nn]) && (nrn<nn));
+                    
+                    if (target_out[i]>target_in[newj])
+                        localmaxw=1.2*target_in[newj];
+                    else
+                        localmaxw=1.2*target_out[i];
+                    
+                    if (nrn<nn && w<localmaxw)
+                    {
+                        
+                        deltaE = w*(w - 2*(target_in[newj] - sum_in[newj]))/pow(tip[newj],2);   // New in node
+                        deltaE += w*(w + 2*(target_in[j] - sum_in[j]))/pow(tip[j],2);           // Old in node
+                        
+                        // Accept or reject
+                        prob = exp(-deltaE*beta);
+                        
+                        if (mt() < prob)
+                        {
+                            sum_in[j] -= w;
+                            sum_in[newj] += w;
+                            energy += deltaE;
+                            move[mr]->update_attempts(1); // move sucessful
+                            newk = i + newj*nn;
+                            // Swap the edge weights around
+                            W[k] = W[newk];
+                            W[newk] = w;
+                            A[k] = 0;
+                            A[newk]=1;
+                            // Update active list
+                            active_edges[iact] = newk;
+                            
+                        }
+                        else
+                        {
+                            move[mr]->update_attempts(0); // move unsucessful
+                        }
+                    }
+                    else
+                    {
+                        move[mr]->update_attempts(0); // move unsucessful
+                    }
+                    
+                }
+                
+            }
+                break;
+                
+            case 4:
+            {
+                ///////// REWIRE IN EDGE /////////
+                
+                if (ne>0)
+                {
+                    // Choose random edge from the active list
+                    iact = mt.randInt(ne-1);    // iact is the position in the active list
+                    k = active_edges[iact];     // k is the position in the adjacency and weights matrices
+                    
+                    // Resolve this into the from (i) and to edge (j)
+                    j = k/nn;
+                    i = k - j*nn;
+                    
+                    // What's the edge weight for the chosen edge
+                    w = W[k];
+                    
+                    // Now choose another node to wire to
+                    nrn=0;
+                    do {
+                        newi = mt.randInt(nn-1);
+                        nrn++;
+                        // Must not be on, self looping or deactivated
+                    } while ((newi==j || newi==i || (!on_out[newi]) || A[newi + j*nn]) && (nrn<nn));
+                    
+                    if (target_out[newi]>target_in[j])
+                        localmaxw=1.2*target_in[j];
+                    else
+                        localmaxw=1.2*target_out[newi];
+                    
+                    if (nrn<nn && w<localmaxw)
+                    {
+                        deltaE = w*(w + 2*(target_out[i] - sum_out[i]))/pow(top[i],2);          // Old out node
+                        deltaE += w*(w - 2*(target_out[newi] - sum_out[newi]))/pow(top[newi],2);// New out node
+                        
+                        // Accept or reject
+                        prob = exp(-deltaE*beta);
+                        
+                        
+                        if (mt() < prob)
+                        {
+                            
+                            
+                            sum_out[i] -= w;
+                            sum_out[newi] += w;
+                            energy += deltaE;
+                            move[mr]->update_attempts(1); // move sucessful
+                            newk = newi + j*nn;
+                            // Swap the edge weights around
+                            W[k] = W[newk];
+                            W[newk] = w;
+                            A[k] = 0;
+                            A[newk]=1;
+                            // Update active list
+                            active_edges[iact] = newk;
+                            
+                        }
+                        else
+                        {
+                            move[mr]->update_attempts(0); // move unsucessful
+                        }
+                    }
+                    else
+                    {
+                        move[mr]->update_attempts(0); // move unsucessful
+                    }
+                    
+                }
+                
+            }
+                break;
+                
+                
+        } // END SWITCH
+        
+        
+    }
+    //// END OF MONTE CARLO SWEEP ////
+    
+    return(0); // success
+    
+}
 
 
 //////////////////////////////////
