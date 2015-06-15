@@ -1,12 +1,11 @@
 #include <Rcpp.h>
 #include "dense_hybrid.h"
-using namespace Rcpp;
 
 // This function faces R. It creates a dense_hybrid object and launches
 // the simulations, extracting the results and sending back to R.
 
 // [[Rcpp::export]]
-int unsumcpp(NumericMatrix constraints,
+int unsumcpp(Rcpp::NumericMatrix constraints,
              long  mct_schedule,
              long  hot_time,
              double beta0,
@@ -22,9 +21,11 @@ int unsumcpp(NumericMatrix constraints,
     dh = new dense_hybrid(nn, target_ne);
     
     // Convert the constraints into something dense_hybrid can read
+    std::vector<double> targetsOut = Rcpp::as<std::vector<double> >(contstraints[SOMETHING]);
+    std::vector<double> targetsIn = Rcpp::as<std::vector<double> >(contstraints[SOMETHING]);
     
     // Copy in the constraints to the targets
-    dh->init_targets(targetsOut then targetsIn)
+    dh->init_targets(targetsOut, targetsIn);
     
     // You'll need to do this a lot more than once
     dh->runjob(ncycles, mct_schedule, hot_time, beta0, betamax, mu0,

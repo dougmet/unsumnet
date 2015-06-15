@@ -68,23 +68,26 @@ dense_hybrid::~dense_hybrid()
     delete cg_sum_in;
 }
 
-void dense_hybrid::init_targets(double * i_target_out, double * i_target_in)
+// Using std::vectors for compatibility outside. I appreciate the jarring
+// change of style. We'll copy into our old school arrays and move along
+void dense_hybrid::init_targets(const std::vector<double> & target_out_i,
+                                const std::vector<double> & target_in_i)
 {
     // Find maximum and find which nodes have no out/in going edges
     maxw=0;
     for (int i=0;i<nn;i++)
     {
         on_out[i] = on_in[i] = true;
-        if (i_target_out[i]<=1e-12)
+        if (target_out_i[i]<=1e-12)
             on_out[i]=false;
-        if (i_target_in[i]<=1e-12)
+        if (target_in_i[i]<=1e-12)
             on_in[i]=false;
         
-        if (i_target_in[i]>maxw)
-            maxw = i_target_in[i];
+        if (target_in_i[i]>maxw)
+            maxw = target_in_i[i];
         
-        if (i_target_out[i]>maxw)
-            maxw = i_target_out[i];
+        if (target_out[i]>maxw)
+            maxw = target_out_i[i];
         
     }
 
@@ -95,8 +98,8 @@ void dense_hybrid::init_targets(double * i_target_out, double * i_target_in)
     // Now scale the whole problem
     for (int i=0;i<nn;i++)
     {
-        target_out[i] = i_target_out[i] / scalew;
-        target_in[i] = i_target_in[i] / scalew;
+        target_out[i] = target_out_i[i] / scalew;
+        target_in[i] = target_in_i[i] / scalew;
     }
 
 }
@@ -221,7 +224,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                 int i,k;
                 for (k=0, i=0;i<ne0;i++)
                     k += A[active_edges0[i]]; // sum all edges who are still on
-                write_monitor("edge_corr.dat", mct, ((double) k)/ne0);
+                //write_monitor("edge_corr.dat", mct, ((double) k)/ne0);
 
                 // Do you want to abort this quench?
 				if ((mct%(20*mct_schedule))==0)
