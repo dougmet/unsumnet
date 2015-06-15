@@ -21,8 +21,11 @@ int unsumcpp(Rcpp::NumericMatrix constraints,
     dh = new dense_hybrid(nn, target_ne);
     
     // Convert the constraints into something dense_hybrid can read
-    std::vector<double> targetsOut = Rcpp::as<std::vector<double> >(contstraints[SOMETHING]);
-    std::vector<double> targetsIn = Rcpp::as<std::vector<double> >(contstraints[SOMETHING]);
+    // Out is first column, in is second column
+    // rowSum==Out
+    // colSum==In
+    std::vector<double> targetsOut = Rcpp::as<std::vector<double> >(contstraints(_,0));
+    std::vector<double> targetsIn = Rcpp::as<std::vector<double> >(contstraints(_,1));
     
     // Copy in the constraints to the targets
     dh->init_targets(targetsOut, targetsIn);
