@@ -1,15 +1,90 @@
-#' Generate unsummed matrix
+#' Generate unsummed adjacency matrix
 #' 
-#' @param constraints A matrix or data frame containing the row and column sums
-#'
-#' @description Given the row and column sums for a square matrix as constraints,
-#' this function will use simulated generate candidate matrices that are sampled
-#' uniformly from the space of possible matrices. This is done using simulated
-#' annealing.
+#' @param constraints A matrix or data frame containing the row and column sums.
+#' NA or negative values are interpretted as unconstrained.
+#' @description Given the row and column sums for a positive weighted
+#' adjacency matrix, this function will generate candidate matrices that are
+#' sampled uniformly from the space of possible matrices. This is done using
+#' simulated annealing.
 #' 
 #' @return a matrix who's row and column sums match constraints
 #' @author Douglas Ashton
-
-unsum <- function(constraints) {
+#' @export
+unsum <- function(constraints,
+                  nedges=NULL,
+                  maxEdges=FALSE,
+                  noReturn=FALSE,
+                  mct_schedule=100,
+                  hot_time=10,
+                  beta0=1e-2,
+                  betamax=1e5,
+                  mu0=0.1,
+                  cooling_rate=1.05,
+                  max_time=1e6,
+                  cgmax=1e-3) {
   
+  # Clean the input
+  constraints <- processInput(constraints)
+  
+  # Quick length/type check of other inputs
+  stopifnot(maxEdges, is.logical(maxEdges), length(maxEdges)==1)
+  stopifnot(noReturn, is.logical(noReturn), length(noReturn)==1)
+  stopifnot(mct_schedule, is.numeric(mct_schedule), length(mct_schedule)==1)
+  stopifnot(hot_time, is.numeric(hot_time), length(hot_time)==1)
+  stopifnot(beta0, is.numeric(beta0), length(beta0)==1)
+  stopifnot(betamax, is.numeric(betamax), length(betamax)==1)
+  stopifnot(mu0, is.numeric(mu0), length(mu0)==1)
+  stopifnot(cooling_rate, is.numeric(cooling_rate), length(cooling_rate)==1)
+  stopifnot(max_time, is.numeric(max_time), length(max_time)==1)
+  stopifnot(cgmax, is.numeric(cgmax), length(cgmax)==1)
+  
+  # I think something bad happens. Stop it.
+  if(maxEdges & noReturn)
+    stop("Can't have maxEdges=TRUE and noReturn=TRUE together")
+  
+  if(!is.null(nedges)) {
+    stopifnot(nedges, is.numeric(cgmax), length(cgmax)==1)
+    if(nedges > nrow(constraints)*(nrow(constraints)-1))
+      stop("Too many edges specified for matrix size")
+    
+    if(nedges > calcMaxEdges(constraints[,1], constraints[,2])) {
+      warning("More edges specified than possible for these row/col sums")
+    }
+    
+    if(maxEdges)
+      stop("Can't specify maxEdges and nedges together")
+  }
+  
+  # Specify the maximum number of edges if asked for
+  if(maxEdges) nedges <- calcMaxEdges(constraints[,1], constraints[,2])
+  
+  unsumcpp(constraints,
+           nedges,
+           maxEdges,
+           noReturn,
+           mct_schedule,
+           hot_time,
+           beta0,
+           betamax,
+           mu0,
+           cooling_rate,
+           max_time,
+           cgmax)
+  
+}
+
+#' Calculate maximum possible edges
+#' 
+#' @param rs numeric vector, row sums
+#' @param cs numeric vector, col sums
+#' @description For a set of row and column sums compute maximum number of
+#' edges assuming no self-loops
+#' 
+#' @return maximum possible number of edges
+#' @author Douglas Ashton
+calcMaxEdges <- function(rs, cs) {
+  n1 <- sum(rs>0)
+  n2 <- sum(cs>0)
+  nb <- sum(rs>0 & cs>0)
+  n1*n2 - nb
 }
