@@ -70,7 +70,8 @@ processInput <- function(constraints, useRowNames=FALSE) {
     stop("constraints must be a matrix or a data frame")
   }
   
-  # Leave NAs here, they'll be replaced in the wrapper function
+  # On the C++ side negative values signify unconstrained. Replace the NAs.
+  constraints <- replace(constraints, is.na(constraints), -1)
   
   return(constraints)
   
