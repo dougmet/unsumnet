@@ -96,7 +96,7 @@ public:
     void initialise_arrays();
     void init_targets(const std::vector<double> & target_out_i,
                       const std::vector<double> & target_in_i);
-	void reset_arrays(bool MAXEDGES);
+	void reset_arrays();
     double total_energy(double *inW);
     double total_energy();
     bool rowcol_iterate();

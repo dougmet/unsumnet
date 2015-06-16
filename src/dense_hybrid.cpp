@@ -128,7 +128,7 @@ int dense_hybrid::runjob(long  mct_schedule,
     
     beta=beta0;
     mu=mu0;
-	reset_arrays(MAXEDGES); // this function zeroes A, resets W and calculates energy
+	reset_arrays(); // this function zeroes A, resets W and calculates energy
 
     
     ////////// MOVES ////////////
@@ -683,7 +683,7 @@ int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
 // Conjugate gradient functions
 //////////////////////////////////
 
-void dense_hybrid::reset_arrays(bool MAXEDGES)
+void dense_hybrid::reset_arrays()
 {
     goforquench=false;
     
