@@ -70,6 +70,8 @@ processInput <- function(constraints, useRowNames=FALSE) {
     stop("constraints must be a matrix or a data frame")
   }
   
+  # Leave NAs here, they'll be replaced in the wrapper function
+  
   return(constraints)
   
 }
