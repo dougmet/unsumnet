@@ -19,7 +19,7 @@ unsum <- function(constraints,
                   beta0=1e-2,
                   betamax=1e5,
                   mu0=0.1,
-                  cooling_rate=1.05,
+                  cooling_rate=1.02,
                   max_time=1e6,
                   cgmax=1e-3) {
   
@@ -27,23 +27,23 @@ unsum <- function(constraints,
   constraints <- processInput(constraints)
   
   # Quick length/type check of other inputs
-  stopifnot(maxEdges, is.logical(maxEdges), length(maxEdges)==1)
-  stopifnot(noReturn, is.logical(noReturn), length(noReturn)==1)
-  stopifnot(mct_schedule, is.numeric(mct_schedule), length(mct_schedule)==1)
-  stopifnot(hot_time, is.numeric(hot_time), length(hot_time)==1)
-  stopifnot(beta0, is.numeric(beta0), length(beta0)==1)
-  stopifnot(betamax, is.numeric(betamax), length(betamax)==1)
-  stopifnot(mu0, is.numeric(mu0), length(mu0)==1)
-  stopifnot(cooling_rate, is.numeric(cooling_rate), length(cooling_rate)==1)
-  stopifnot(max_time, is.numeric(max_time), length(max_time)==1)
-  stopifnot(cgmax, is.numeric(cgmax), length(cgmax)==1)
+  stopifnot(is.logical(maxEdges), length(maxEdges)==1)
+  stopifnot(is.logical(noReturn), length(noReturn)==1)
+  stopifnot(is.numeric(mct_schedule), length(mct_schedule)==1)
+  stopifnot(is.numeric(hot_time), length(hot_time)==1)
+  stopifnot(is.numeric(beta0), length(beta0)==1)
+  stopifnot(is.numeric(betamax), length(betamax)==1)
+  stopifnot(is.numeric(mu0), length(mu0)==1)
+  stopifnot(is.numeric(cooling_rate), length(cooling_rate)==1)
+  stopifnot(is.numeric(max_time), length(max_time)==1)
+  stopifnot(is.numeric(cgmax), length(cgmax)==1)
   
   # I think something bad happens. Stop it.
   if(maxEdges & noReturn)
     stop("Can't have maxEdges=TRUE and noReturn=TRUE together")
   
   if(!is.null(nedges)) {
-    stopifnot(nedges, is.numeric(cgmax), length(cgmax)==1)
+    stopifnot(is.numeric(nedges), length(nedges)==1)
     if(nedges > nrow(constraints)*(nrow(constraints)-1))
       stop("Too many edges specified for matrix size")
     

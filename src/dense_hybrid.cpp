@@ -192,7 +192,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
             
 			if ((mct%(10*mct_schedule))==0)
             {
-                cout <<  "  t=" << mct << ", beta=" << beta << ", step=" << move[2]->step << ":" << move[2]->success_rate << ", E=" << energy/nn << ", ne=" << ne << ":" << move[0]->success_rate << ":" << move[1]->success_rate << " rw" << move[3]->success_rate << ":" << move[4]->success_rate << endl;
+                Rcpp::Rcout <<  "  t=" << mct << ", beta=" << beta << ", step=" << move[2]->step << ":" << move[2]->success_rate << ", E=" << energy/nn << ", ne=" << ne << ":" << move[0]->success_rate << ":" << move[1]->success_rate << " rw" << move[3]->success_rate << ":" << move[4]->success_rate << endl;
                 
             
                 //cout << total_energy() - energy << endl;
@@ -293,7 +293,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
 
             } // hot time if
 
-#ifdef DH_FOR_R
+#ifdef BUILD_FOR_R
             // Check in with R
             Rcpp::checkUserInterrupt();
 #endif
@@ -840,7 +840,7 @@ bool dense_hybrid::rowcol_iterate()
         if (deltaE < 1e-18)
         {
             success=true;
-            cout << "ROW-COL-ITER: SUCCESS " << iter << endl;
+//            cout << "ROW-COL-ITER: SUCCESS " << iter << endl;
             break;
         }
         
@@ -854,7 +854,7 @@ bool dense_hybrid::rowcol_iterate()
         
         if (nconsec>5)
         {
-            cout << "ROW-COL-ITER: FAIL " << iter << endl;
+//            cout << "ROW-COL-ITER: FAIL " << iter << endl;
             success=false;
             break;
         }
@@ -864,8 +864,8 @@ bool dense_hybrid::rowcol_iterate()
         iter ++; // increment counter
     }
     
-    if (iter==5000)
-        cout << "ROW-COL-ITER: FAIL " << iter << endl;
+//    if (iter==5000)
+//        cout << "ROW-COL-ITER: FAIL " << iter << endl;
     
     delete sumhold;
     

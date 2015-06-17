@@ -21,7 +21,7 @@
 using namespace std; 
 #include "MersenneTwister.h"
 
-#ifdef DH_FOR_R
+#ifdef BUILD_FOR_R
 #include <Rcpp.h>
 #endif
 

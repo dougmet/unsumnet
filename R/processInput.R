@@ -55,7 +55,7 @@ processInput <- function(constraints, useRowNames=FALSE) {
     }
     
     # Minimum row and column constraints
-    if (ncol(constraints<2)) {
+    if (ncol(constraints)<2) {
       stop("Need at least two columns in constraints matrix")
     }
     
@@ -65,6 +65,7 @@ processInput <- function(constraints, useRowNames=FALSE) {
     } else {
       vertexNames <- dimnames(constraints)[[1]]
     }
+    dimnames(constraints)[[1]] <- vertexNames
     
   } else {
     stop("constraints must be a matrix or a data frame")
