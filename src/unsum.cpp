@@ -58,7 +58,7 @@ SEXP unsumcpp(Rcpp::NumericMatrix constraints,
     int result=1;
     
     while(result>0) {
-      int result = dh->runjob(mct_schedule, hot_time, beta0, betamax, mu0,
+      result = dh->runjob(mct_schedule, hot_time, beta0, betamax, mu0,
       cooling_rate, max_time, cgmax);
       
       report(result); // If result>0 then report back.
@@ -67,16 +67,14 @@ SEXP unsumcpp(Rcpp::NumericMatrix constraints,
       
       Rcout << "Result=" << result << endl;
     }
-    
-    Rcout << "Hello" << endl;
-    
+        
     NumericMatrix A(nn, nn);
     NumericMatrix W(nn, nn);
     // Copy data from the matrices in dh
     // Both are column major (I think)
     for (int i=0; i<nn*nn; i++) {
       A[i] = dh->A[i];
-      W[i] = dh->W[i];
+      W[i] = dh->W[i] * dh->scalew;
     }
     
     delete dh; // cleanup

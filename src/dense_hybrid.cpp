@@ -192,7 +192,9 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
             
 			if ((mct%(10*mct_schedule))==0)
             {
+#ifdef BUILD_FOR_R
                 Rcpp::Rcout <<  "  t=" << mct << ", beta=" << beta << ", step=" << move[2]->step << ":" << move[2]->success_rate << ", E=" << energy/nn << ", ne=" << ne << ":" << move[0]->success_rate << ":" << move[1]->success_rate << " rw" << move[3]->success_rate << ":" << move[4]->success_rate << endl;
+#endif
                 
             
                 //cout << total_energy() - energy << endl;
@@ -214,7 +216,9 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
 				
 				if (mct==hot_time)
 				{
-					cout << "End of hot_time" << endl;
+#ifdef BUILD_FOR_R
+					Rcpp::Rcout << "End of hot_time" << endl;
+#endif
 					energy = total_energy();
 				}                
             }
@@ -257,7 +261,9 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                         {
                             if (ne==target_ne)
                             {
-                                cout << "Switching off insertions/deletions." << endl;
+#ifdef BUILD_FOR_R
+                                Rcpp::Rcout << "Switching off insertions/deletions." << endl;
+#endif
                                 goforquench=true;
                                 // Switch off insertions/deletions, we'll stick with this config
                                 move[0]->NperMC=move[1]->NperMC=0;
@@ -271,7 +277,9 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                     {
                         if (rowcol_iterate())
                         {
-                            cout << "Freezing edge swaps." << endl;
+#ifdef BUILD_FOR_R
+                            Rcpp::Rcout << "Freezing edge swaps." << endl;
+#endif
                             move[3]->NperMC=move[4]->NperMC=0;
                         }
                     }
@@ -724,7 +732,7 @@ void dense_hybrid::reset_arrays()
                 }
             }
         }
-        cout << "Max edges filled to ne=" << ne << " edges" << endl;
+//        cout << "Max edges filled to ne=" << ne << " edges" << endl;
     }
 	
     energy=0;
@@ -736,7 +744,9 @@ void dense_hybrid::reset_arrays()
         if (target_in[i]>1e-12) energy += pow((target_in[i]-sum_in[i])/tip[i],2); // initialise energy, remember all edges are off
         if (target_out[i]>1e-12) energy += pow((target_out[i]-sum_out[i])/top[i],2); // initialise energy, remember all edges are off
     }
-    cout << "Energy(0)=" << energy << endl;
+#ifdef BUILD_FOR_R
+    Rcpp::Rcout << "Energy(0)=" << energy << endl;
+#endif
 }
 
 
