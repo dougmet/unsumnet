@@ -21,6 +21,10 @@
 using namespace std; 
 #include "MersenneTwister.h"
 
+#ifdef DH_FOR_R
+#include <Rcpp.h>
+#endif
+
 #define FTOL 1e-16
 //#define ITMAX 100000
 #define ITMAX 10000

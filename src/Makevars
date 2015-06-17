@@ -1,0 +1,2 @@
+# Flag to dense_hybrid that it's in R
+PKG_CXXFLAGS=-DDH_FOR_R

@@ -293,6 +293,10 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
 
             } // hot time if
 
+#ifdef DH_FOR_R
+            // Check in with R
+            Rcpp::checkUserInterrupt();
+#endif
         } // mct_schedule if
         
     } // end mct loop
