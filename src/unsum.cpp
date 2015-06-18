@@ -68,18 +68,28 @@ SEXP unsumcpp(Rcpp::NumericMatrix constraints,
       Rcout << "Result=" << result << endl;
     }
         
-    NumericMatrix A(nn, nn);
+    IntegerMatrix A(nn, nn);
     NumericMatrix W(nn, nn);
     // Copy data from the matrices in dh
     // Both are column major (I think)
+    int ne=0; // count the edges
     for (int i=0; i<nn*nn; i++) {
       A[i] = dh->A[i];
+      ne += A[i];
       W[i] = dh->W[i] * dh->scalew;
+    }
+    
+    // The refined solution is in the activeW and active_edges arrays
+    NumericMatrix AW(nn, nn);
+    for (int i=0; i<ne; i++) {
+      int k = dh->active_edges[i];
+      AW[k] = dh->activeW[i] * dh->scalew;
     }
     
     delete dh; // cleanup
 
     return List::create(Named( "A" ) = A,
-                              Named( "W" ) = W);
+                        Named( "W" ) = W,
+                        Named( "AW") = AW);
 }
 
