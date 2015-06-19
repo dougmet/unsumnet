@@ -70,7 +70,7 @@ public:
     double SCALE_FAC;
 
     double maxw,minw, scalew;    // restrict the range of Ws (careful!)
-    long nn, ncycles, vol;
+    long nn, vol;
     long target_ne, ne, ne0;     // Target number of edges and actual number, number at end of hot time
     
     double beta, mu;        // fields for energy and ne (beta is inverse temperature, beta=1/T)

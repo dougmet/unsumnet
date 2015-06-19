@@ -152,7 +152,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
     ////////////////////////////////////
     
     
-    for (mct=0;mct<ncycles;mct++)
+    for (mct=0;mct<max_time;mct++)
     {
         if(!MAXEDGES)    // In the max edges run we always switch off insertions/deletions and edge moves
         {
