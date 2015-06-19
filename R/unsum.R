@@ -42,6 +42,9 @@ unsum <- function(constraints,
   if(maxEdges & noReturn)
     stop("Can't have maxEdges=TRUE and noReturn=TRUE together")
   
+  if(!maxEdges & is.null(nedges))
+    stop("Must supply nedges or set maxEdges=TRUE")
+  
   if(!is.null(nedges)) {
     stopifnot(is.numeric(nedges), length(nedges)==1)
     if(nedges > nrow(constraints)*(nrow(constraints)-1))
