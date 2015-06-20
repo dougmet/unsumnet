@@ -110,7 +110,8 @@ unsum <- function(constraints,
 #' @param rs numeric vector, row sums
 #' @param cs numeric vector, col sums
 #' @description For a set of row and column sums compute maximum number of
-#' edges assuming no self-loops
+#' edges assuming no self-loops. Any row/column sum that is zero implies that
+#' node has no outgoing/incoming edges.
 #' 
 #' @return maximum possible number of edges
 #' @author Douglas Ashton
