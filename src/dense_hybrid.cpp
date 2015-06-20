@@ -823,7 +823,7 @@ bool dense_hybrid::rowcol_iterate()
         for (int isum=0;isum<nn;isum++)
             sumhold[isum]=0;
         
-        // Work out the row sum
+        // Work out the column sum
         for (l=0;l<ne;l++)
         {
             k = active_edges[l];     // k is the position in the adjacency and weights matrices
