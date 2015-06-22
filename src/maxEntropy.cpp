@@ -3,10 +3,10 @@ using namespace Rcpp;
 
 
 // [[Rcpp::export]]
-NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs) {
+NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs,
+                            double minError) {
   
   double err = 1;
-  int i=0;
 
   int n = rs.length();
   NumericVector rsaw(n);
@@ -16,11 +16,12 @@ NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs
   LogicalVector cson(n, true);
   
   for (int i=0; i<n; i++) {
-    if(rs[i] > 1e-12) rson[i] = false;
-    if(cs[i] > 1e-12) cson[i] = false;
+    if(rs[i] < 1e-12) rson[i] = false;
+    if(cs[i] < 1e-12) cson[i] = false;
   }
-    
-  while(err > 1e-18) {
+  
+  int iter = 0;
+  while(err > minError && iter < 5000) {
     // Get the row sums
     for(int i=0; i<n; i++) {
       rsaw[i]=0;
@@ -60,9 +61,13 @@ NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs
       }
     }
     
+    // This is all Rcpp sugar.
+    err = sum(pow(cs - csaw,2) + pow(rs-rsaw,2));
     
-    
+    iter ++;
   }
-  
+
+
+  return(aw);  
 }
 
