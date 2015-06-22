@@ -22,7 +22,10 @@ maxEntropy <- function(rs, cs, minError=1e-18) {
   
   if(length(rs)!=length(cs)) stop("rs and cs must be same length")
   
-  if(sum(rs) != sum(cs)) stop("Sum of row and column sums should be the same")
+  if(sum(rs) != sum(cs)) {
+    stop(paste("Sum of row and column sums should be the same. sum(rs)-sum(cs) =",
+               sum(rs)-sum(cs)))
+  }
   
   # Create matrix of ones and zero the diagonal
   aw <- matrix(1, nrow=length(rs), ncol=length(cs)) - diag(1, nrow=length(rs))
