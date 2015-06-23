@@ -9,15 +9,27 @@ NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs
   double err = 1;
 
   int n = rs.length();
+  // These vectors hold the current row/col sums
   NumericVector rsaw(n);
   NumericVector csaw(n);
-  
-  LogicalVector rson(n, true);
-  LogicalVector cson(n, true);
-  
+  // These vectors tell us whether any out/in edges are allowed
+  LogicalVector rson = rs > 1e-12;
+  LogicalVector cson = cs > 1e-12;
+  // We also need to catch missing values
+  LogicalVector rsna = is_na(rs);
+  LogicalVector csna = is_na(cs);
+  // Remember negatives are considered missing values
   for (int i=0; i<n; i++) {
-    if(rs[i] < 1e-12) rson[i] = false;
-    if(cs[i] < 1e-12) cson[i] = false;
+    if(rs[i] < -1e-12) rsna[i] = true;
+    if(cs[i] < -1e-12) csna[i] = true;
+  }
+  
+  // Clear zero row/cols
+  for(int i=0; i<n; i++) {
+    for (int j=0;j<n;j++) {
+      if((!rson[i]) || (!cson[j]))
+           aw(i,j) = 0;
+    }
   }
   
   int iter = 0;
@@ -25,19 +37,17 @@ NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs
     // Get the row sums
     for(int i=0; i<n; i++) {
       rsaw[i]=0;
-      if (rson[i]) {
         for (int j=0;j<n;j++) {
           rsaw[i] += aw(i,j);
         }
-      } else {
-        rsaw[i]=1;
-      }
     }
     
     // Apply row sums
     for (int i=0;i<n;i++) {
-      for (int j=0;j<n;j++) {
-        aw(i,j) *= rs[i] / rsaw[i];
+      if(rson[i] && !rsna[i]) {
+        for (int j=0;j<n;j++) {
+          aw(i,j) *= rs[i] / rsaw[i];
+        }
       }
     }
     
@@ -45,25 +55,31 @@ NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs
     // Get the col sums
     for(int i=0; i<n; i++) {
       csaw[i]=0;
-      if (cson[i]) {
         for (int j=0;j<n;j++) {
           csaw[i] += aw(j,i);
         }
-      } else {
-        csaw[i]=1;
-      }
     }
     
-    // Apply col sums
+    // Apply col sums (if appropriate)
     for (int i=0;i<n;i++) {
-      for (int j=0;j<n;j++) {
-        aw(j,i) *= cs[i] / csaw[i];
+      if(cson[i] && !csna[i]) {
+        for (int j=0;j<n;j++) {
+          aw(j,i) *= cs[i] / csaw[i];
+        }
       }
     }
-    
-    // This is all Rcpp sugar.
-    err = sum(pow(cs - csaw,2) + pow(rs-rsaw,2));
-    
+
+    // Calculate the error, ignore missings    
+    err=0;
+    for (int i=0; i<n; i++) {
+      if(!rsna[i]) {
+        err += std::pow(rs[i] - rsaw[i],2);
+      }
+      if(!csna[i]) {
+        err += std::pow(cs[i] - csaw[i],2);
+      }
+    }
+        
     iter ++;
   }
 

@@ -109,3 +109,14 @@ test_that('maxEntropy gives correct result', {
 test_that('maxEntropy fails when it should', {
   expect_false(maxEntropy(c(10, 3,1), c(5,0,9)))
 })
+
+test_that('maxEntropy deals with missings', {
+  # Should give a warning for missings
+  expect_warning(maxEntropy(c(1,2,NA), c(1,2,2)))
+  
+  # Must give a sensible result for missings
+  expect_equal(suppressWarnings(maxEntropy(c(1,2,NA), c(1,2,2))), 
+  structure(c(0, 0.5000000003705, 0.4999999996295, 0.5000000003705, 
+  0, 1.4999999996295, 0.49999999981475, 1.50000000018525, 0), .Dim = c(3L, 3L)))
+  
+})
