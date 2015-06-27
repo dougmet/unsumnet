@@ -387,7 +387,7 @@ int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
                             // Accept or reject
                             prob = exp(-beta*(deltaE + mu*deltaM)) * vol / ((double) ne + 1.0);
                             
-                            if (mt() < prob)
+                            if (mt.rand53() < prob)
                             {
                                 // Success!
                                 A[k] = 1;                // switch on the edge
@@ -442,7 +442,7 @@ int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
                     prob = exp(-beta*(deltaE + mu*deltaM)) * ((double) ne) / vol;
                     
                     
-                    if (mt() < prob)
+                    if (mt.rand53() < prob)
                     {
                         
                         // Success!
@@ -482,7 +482,7 @@ int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
                     j = k/nn;
                     i = k - j*nn;
                     
-                    r = move[mr]->step*(1.0 - 2*mt());    // evenly distributed on +/- stepsize
+                    r = move[mr]->step*(1.0 - 2*mt.rand53());    // evenly distributed on +/- stepsize
                     
                     if (target_out[i]>target_in[j])
                         localmaxw=1.2*target_in[j];
@@ -512,7 +512,7 @@ int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
                         prob = exp(-deltaE*beta);
                         
                         
-                        if (mt() < prob)
+                        if (mt.rand53() < prob)
                         {
                             W[k] += dw;
                             sum_out[i] += dw;
@@ -576,7 +576,7 @@ int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
                         // Accept or reject
                         prob = exp(-deltaE*beta);
                         
-                        if (mt() < prob)
+                        if (mt.rand53() < prob)
                         {
                             sum_in[j] -= w;
                             sum_in[newj] += w;
@@ -646,7 +646,7 @@ int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
                         prob = exp(-deltaE*beta);
                         
                         
-                        if (mt() < prob)
+                        if (mt.rand53() < prob)
                         {
                             
                             

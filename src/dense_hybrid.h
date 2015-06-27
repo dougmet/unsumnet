@@ -19,18 +19,19 @@
 #include <string>
 #include <cstring>
 using namespace std; 
-#include "MersenneTwister.h"
 
 #ifdef BUILD_FOR_R
-#include <Rcpp.h>
+ #include <Rcpp.h>
+#else
+ // Nothing for now
 #endif
 
 #define FTOL 1e-16
 //#define ITMAX 100000
 #define ITMAX 10000
 
-
-#include "move_class.h"
+#include "rng_wrap.h"     // Random numbers
+#include "move_class.h"   // MC move selection and control
 
 
 
@@ -65,7 +66,7 @@ public:
 
     double energy;
     
-    MTRand mt;          // Random number generator
+    rng_wrap mt;          // Random number generator
 
     double SCALE_FAC;
 
