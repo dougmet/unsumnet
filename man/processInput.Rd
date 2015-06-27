@@ -4,10 +4,13 @@
 \alias{processInput}
 \title{Process the input constraints}
 \usage{
-processInput(constraints)
+processInput(constraints, useRowNames = FALSE)
 }
 \arguments{
 \item{constraints}{A matrix or data frame containing the row and column sums}
+
+\item{useRowNames}{Logical if TRUE it the vertex names will be taken from
+the data frame's row names. This is not used for matrices.}
 }
 \value{
 an object ready for sending to the C++ functions as input

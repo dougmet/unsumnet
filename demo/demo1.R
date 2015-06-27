@@ -1,5 +1,6 @@
 ## TO BE CONVERTED TO VIGNETTE
 
+set.seed(11)
 constraints <- matrix(rep(c(10,6,6,4,2,1),2),ncol=2)
 fit <- unsum(constraints, 12)
 
