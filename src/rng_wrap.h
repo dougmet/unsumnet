@@ -15,7 +15,7 @@ class rng_wrap
 public:
 	//////// VARIABLES //////////
 #ifdef BUILD_FOR_R
-    // Nothing to do
+    Rcpp::RNGScope rngScope;
 #else
     MTRand mt;
 #endif
