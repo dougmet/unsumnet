@@ -30,8 +30,8 @@ using namespace std;
 //#define ITMAX 100000
 #define ITMAX 10000
 
-#include "rng_wrap.h"     // Random numbers
-#include "move_class.h"   // MC move selection and control
+#include "MersenneTwister.h"  // Random numbers
+#include "move_class.h"       // MC move selection and control
 
 
 
@@ -66,7 +66,7 @@ public:
 
     double energy;
     
-    rng_wrap mt;          // Random number generator
+    MTRand mt;          // Random number generator
 
     double SCALE_FAC;
 
