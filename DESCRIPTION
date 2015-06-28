@@ -9,4 +9,6 @@ LazyData: true
 LinkingTo: Rcpp
 Imports: Rcpp
 Suggests: testthat,
-    igraph
+    igraph,
+    knitr
+VignetteBuilder: knitr

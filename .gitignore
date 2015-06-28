@@ -4,3 +4,4 @@
 .Rbuildignore
 banknet.Rproj
 MersenneTwister.h
+inst/doc
