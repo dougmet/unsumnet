@@ -20,6 +20,17 @@ void report(int result) {
   }
 }
 
+void setDHSeed(dense_hybrid *dh) {
+  const long unsigned int length=600;
+  long unsigned int array[length];
+  
+  for (int i=0;i<length;i++) {
+    array[i] = (long unsigned int)(4294967296 * R::runif(0,1));
+  }
+  
+  dh->mt.seed(array, length);
+}
+
 // This function faces R. It creates a dense_hybrid object and launches
 // the simulations, extracting the results and sending back to R.
 
@@ -46,6 +57,11 @@ SEXP unsumcpp(Rcpp::NumericMatrix constraints,
     dense_hybrid *dh; // everything happens in this object
     
     dh = new dense_hybrid(nn, target_ne, maxEdges, noReturn);
+    
+    // Set a really big RNG seed. This is the best way I have so far of
+    // coupling the R RNG state with C without everything crashing.
+    setDHSeed(dh);
+    
     
     // Convert the constraints into something dense_hybrid can read
     // Out is first column, in is second column
