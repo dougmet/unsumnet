@@ -37,6 +37,11 @@ SEXP unsumcpp(Rcpp::NumericMatrix constraints,
              long max_time,
              double cgmax)
 {
+    IntegerVector resultSums = IntegerVector::create(Named("Success")=0,
+                                                     Named("TimeOut")=0,
+                                                     Named("Plateau")=0,
+                                                     Named("Invalid")=0);
+  
     int nn = constraints.nrow();
     dense_hybrid *dh; // everything happens in this object
     
@@ -66,6 +71,7 @@ SEXP unsumcpp(Rcpp::NumericMatrix constraints,
       checkUserInterrupt(); // This should happen in dense_hybrid but to be sure
       
       Rcout << "Result=" << result << endl;
+      resultSums[result] ++;
     }
         
     IntegerMatrix A(nn, nn);
@@ -90,6 +96,7 @@ SEXP unsumcpp(Rcpp::NumericMatrix constraints,
 
     return List::create(Named( "A" ) = A,
                         Named( "W" ) = W,
-                        Named( "AW") = AW);
+                        Named( "AW") = AW,
+                        Named( "Results" ) = resultSums);
 }
 
