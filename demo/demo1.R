@@ -1,13 +1,13 @@
 ## TO BE CONVERTED TO VIGNETTE
 
-set.seed(11)
+set.seed(17)
 constraints <- matrix(rep(c(10,6,6,4,2,1),2),ncol=2)
 fit <- unsum(constraints, 12)
 
 library(igraph)
 g <- graph.adjacency(fit$AW, weighted = TRUE)
-
-plot(g, edge.width=E(g)$weight, edge.curved=is.mutual(g))
+lo <- layout.circle(g)
+plot(g, edge.width=E(g)$weight, edge.curved=is.mutual(g), layout=lo)
 
 
 # This is a neat example where maxEntropy is rubbish.
