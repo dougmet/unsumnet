@@ -16,15 +16,31 @@ Intro paragraph
 ## Aggregated Data
 
 Data comes in in a summed up way. Either load an example data set or make a matrix and sum it.
+```{r}
+library(banknet)
+
+set.seed(33)
+nodeNames <- LETTERS[1:6]
+a <- matrix(sample(0:1, 36, prob = c(0.85,0.15), replace=TRUE), ncol=6)
+diag(a) <- 0
+awTrue <- a * abs(rnorm(36, 40, 15))
+
+dimnames(awTrue) <- list(nodeNames, nodeNames)
+awTrue
+
+
+```
+
+Start with a 
 
 ```{r}
-constraints <- matrix(rep(c(10,6,6,4,2,1),2),ncol=2)
+constraints <- data.frame(nodeNames=nodeNames, totalOut=rowSums(awTrue), totalIn=colSums(awTrue))
+constraints
 ```
 
 ## Creating a network
 
 ```{r}
-library(banknet)
 set.seed(11)
 fit <- unsum(constraints, 12)
 fit$AW
@@ -38,10 +54,18 @@ The figure sizes have been customised so that you can easily put two images side
 
 ```{r, fig.show='hold', fig.cap="hello"}
 library(igraph)
-g <- graph.adjacency(fit$AW, weighted = TRUE)
-lo <- layout.circle(g)
-plot(g, edge.width=E(g)$weight, edge.curved=is.mutual(g), layout=lo)
+gTrue <- graph.adjacency(awTrue, weighted = TRUE)
+lo <- layout.circle(gTrue)
+sw <- max(awTrue)/10
+plot(gTrue, edge.width=E(gTrue)$weight/sw, edge.curved=is.mutual(gTrue), layout=lo)
+
+awME <- maxEntropy(constraints$totalOut,constraints$totalIn)
+gME <- graph.adjacency(awME, weighted = TRUE)
+sw <- max(awTrue)/10
+plot(gME, edge.width=E(gME)$weight/sw, edge.curved=is.mutual(gME), layout=lo)
 ```
+
+
 
 You can enable figure captions by `fig_caption: yes` in YAML:
 
