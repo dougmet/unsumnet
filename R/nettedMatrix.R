@@ -10,14 +10,10 @@
 #'
 nettedMatrix <- function(w) {
   
-  if(is.matrix(w)) {
+  if(!is.matrix(w) | !is.numeric(w)) stop("Must be a numeric matrix")
+  if(nrow(w) != ncol(w)) stop("Must be square matrix")
     
-    if(nrow(w) != ncol(w)) stop("Must be square matrix")
-    
-    wOut <- w - t(w)
-  } else {
-    stop("Must be numeric matrix")
-  }
+  wOut <- w - t(w)
   
   return(wOut * (wOut>0))
 }
