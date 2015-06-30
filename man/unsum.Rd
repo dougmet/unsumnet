@@ -4,9 +4,10 @@
 \alias{unsum}
 \title{Generate unsummed adjacency matrix}
 \usage{
-unsum(constraints, nEdges = NULL, maxEdges = FALSE, noReturn = FALSE,
-  mctSchedule = 100, hotTime = 2000, beta0 = 0.01, betaMax = 1e+05,
-  mu0 = 0.1, coolingRate = 1.02, maxTime = 1e+06, minError = 0.001)
+unsum(constraints, nEdges = NULL, verbose = FALSE, maxEdges = FALSE,
+  noReturn = FALSE, mctSchedule = 100, hotTime = 2000, beta0 = 0.01,
+  betaMax = 1e+05, mu0 = 0.1, coolingRate = 1.02, maxTime = 1e+06,
+  minError = 0.001)
 }
 \arguments{
 \item{constraints}{A matrix or data frame containing the row and column sums.
@@ -14,6 +15,9 @@ NA or negative values are interpretted as unconstrained.}
 
 \item{nEdges}{Integer The desired number of edges (non-zero elements) the
 adjacency matrix should have.}
+
+\item{verbose}{Logical if set to TRUE then maximum output will be written to
+screen. Default is FALSE.}
 
 \item{maxEdges}{Logical if set to TRUE then all possible edges will be used.
 The number of possible edges is given by \code{\link{calcMaxEdges}}. Default
@@ -47,7 +51,7 @@ starting again.}
 \item{minError}{When the error drops below this threshold it is decided that it
 is close enough to a solution. The remaining error is resolved using the row/col
 iterator. A bigger number will give better performance but risks skewing the
-distirbution of networks.}
+distribution of networks.}
 }
 \value{
 an \code{unsumnet} object, which is a list containing:
