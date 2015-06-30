@@ -58,6 +58,8 @@ an \code{unsumnet} object, which is a list containing:
  \item{\code{W}: }{The final weights matrix (for on and off edges) before iterating
  to the final solution}
  \item{\code{Results}: } {Counts for the number of outcomes from dense_hybrid.}
+ \item{\code{targetEdges }} {Number of edges requested}
+ \item{\code{nEdges }} {Number of edges obtained}
 }
 }
 \description{

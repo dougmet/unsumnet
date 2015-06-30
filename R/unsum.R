@@ -27,7 +27,7 @@
 #' @param minError When the error drops below this threshold it is decided that it
 #' is close enough to a solution. The remaining error is resolved using the row/col
 #' iterator. A bigger number will give better performance but risks skewing the
-#' distirbution of networks.
+#' distribution of networks.
 #'
 #' @description Given the row and column sums for a positive weighted
 #' adjacency matrix, this function will generate candidate matrices that are
@@ -42,6 +42,8 @@
 #'  \item{\code{W}: }{The final weights matrix (for on and off edges) before iterating
 #'  to the final solution}
 #'  \item{\code{Results}: } {Counts for the number of outcomes from dense_hybrid.}
+#'  \item{\code{targetEdges }} {Number of edges requested}
+#'  \item{\code{nEdges }} {Number of edges obtained}
 #' }
 #' @author Douglas Ashton
 #' @export
@@ -113,6 +115,9 @@ unsum <- function(constraints,
                    minError)
   
   class(usum) <- "unsumnet"
+  
+  usum$targetEdges <- nEdges
+  usum$nEdges <- sum(usum$A)
   
   return(usum)
   
