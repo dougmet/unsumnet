@@ -5,7 +5,7 @@
 #'
 #' @param w A square numeric matrix
 #'
-#' @return
+#' @return A numeric matrix with the positive elements of w-w'
 #' @export
 #'
 nettedMatrix <- function(w) {

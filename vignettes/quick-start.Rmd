@@ -17,7 +17,7 @@ Intro paragraph
 
 Data comes in in a summed up way. Either load an example data set or make a matrix and sum it.
 ```{r}
-library(banknet)
+library(unsumnet)
 
 set.seed(33)
 nodeNames <- LETTERS[1:6]

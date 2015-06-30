@@ -34,7 +34,15 @@
 #' sampled uniformly from the space of possible matrices. This is done using
 #' simulated annealing.
 #' 
-#' @return a matrix who's row and column sums match constraints
+#' @return an \code{unsumnet} object, which is a list containing:
+#' \itemize{
+#'  \item{\code{AW}: }{The weighted adjacency matrix that satisfies the row/col sum 
+#'  constraints}
+#'  \item{\code{A}: }{The (unweighted) adjacency matrix containing network structure.}
+#'  \item{\code{W}: }{The final weights matrix (for on and off edges) before iterating
+#'  to the final solution}
+#'  \item{\code{Results}: } {Counts for the number of outcomes from dense_hybrid.}
+#' }
 #' @author Douglas Ashton
 #' @export
 unsum <- function(constraints,
@@ -90,18 +98,23 @@ unsum <- function(constraints,
   
   if(coolingRate<=1) stop("coolingRate must be greater than 1")
   
-  unsumcpp(constraints,
-           nEdges,
-           maxEdges,
-           noReturn,
-           mctSchedule,
-           hotTime,
-           beta0,
-           betaMax,
-           mu0,
-           coolingRate,
-           maxTime,
-           minError)
+  # Call the Rcpp wrapper function that calls dense_hybrid
+  usum <- unsumcpp(constraints,
+                   nEdges,
+                   maxEdges,
+                   noReturn,
+                   mctSchedule,
+                   hotTime,
+                   beta0,
+                   betaMax,
+                   mu0,
+                   coolingRate,
+                   maxTime,
+                   minError)
+  
+  class(usum) <- "unsumnet"
+  
+  return(usum)
   
 }
 

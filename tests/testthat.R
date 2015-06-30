@@ -1,4 +1,4 @@
 library(testthat)
-library(banknet)
+library(unsumnet)
 
-test_check("banknet")
+test_check("unsumnet")

@@ -50,7 +50,15 @@ iterator. A bigger number will give better performance but risks skewing the
 distirbution of networks.}
 }
 \value{
-a matrix who's row and column sums match constraints
+an \code{unsumnet} object, which is a list containing:
+\itemize{
+ \item{\code{AW}: }{The weighted adjacency matrix that satisfies the row/col sum
+ constraints}
+ \item{\code{A}: }{The (unweighted) adjacency matrix containing network structure.}
+ \item{\code{W}: }{The final weights matrix (for on and off edges) before iterating
+ to the final solution}
+ \item{\code{Results}: } {Counts for the number of outcomes from dense_hybrid.}
+}
 }
 \description{
 Given the row and column sums for a positive weighted
