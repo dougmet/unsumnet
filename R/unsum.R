@@ -4,6 +4,8 @@
 #' NA or negative values are interpretted as unconstrained.
 #' @param nEdges Integer The desired number of edges (non-zero elements) the 
 #' adjacency matrix should have.
+#' @param verbose Logical if set to TRUE then maximum output will be written to
+#' screen. Default is FALSE.
 #' @param maxEdges Logical if set to TRUE then all possible edges will be used.
 #' The number of possible edges is given by \code{\link{calcMaxEdges}}. Default
 #' is FALSE.
@@ -49,6 +51,7 @@
 #' @export
 unsum <- function(constraints,
                   nEdges=NULL,
+                  verbose=FALSE,
                   maxEdges=FALSE,
                   noReturn=FALSE,
                   mctSchedule=100,
@@ -103,6 +106,7 @@ unsum <- function(constraints,
   # Call the Rcpp wrapper function that calls dense_hybrid
   usum <- unsumcpp(constraints,
                    nEdges,
+                   verbose,
                    maxEdges,
                    noReturn,
                    mctSchedule,

@@ -5,7 +5,7 @@ maxEntropyCpp <- function(aw, rs, cs, minError) {
     .Call('unsumnet_maxEntropyCpp', PACKAGE = 'unsumnet', aw, rs, cs, minError)
 }
 
-unsumcpp <- function(constraints, target_ne, maxEdges, noReturn, mct_schedule, hot_time, beta0, betamax, mu0, cooling_rate, max_time, cgmax) {
-    .Call('unsumnet_unsumcpp', PACKAGE = 'unsumnet', constraints, target_ne, maxEdges, noReturn, mct_schedule, hot_time, beta0, betamax, mu0, cooling_rate, max_time, cgmax)
+unsumcpp <- function(constraints, target_ne, verbose, maxEdges, noReturn, mct_schedule, hot_time, beta0, betamax, mu0, cooling_rate, max_time, cgmax) {
+    .Call('unsumnet_unsumcpp', PACKAGE = 'unsumnet', constraints, target_ne, verbose, maxEdges, noReturn, mct_schedule, hot_time, beta0, betamax, mu0, cooling_rate, max_time, cgmax)
 }
 

@@ -20,13 +20,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // unsumcpp
-SEXP unsumcpp(Rcpp::NumericMatrix constraints, int target_ne, bool maxEdges, bool noReturn, long mct_schedule, long hot_time, double beta0, double betamax, double mu0, double cooling_rate, long max_time, double cgmax);
-RcppExport SEXP unsumnet_unsumcpp(SEXP constraintsSEXP, SEXP target_neSEXP, SEXP maxEdgesSEXP, SEXP noReturnSEXP, SEXP mct_scheduleSEXP, SEXP hot_timeSEXP, SEXP beta0SEXP, SEXP betamaxSEXP, SEXP mu0SEXP, SEXP cooling_rateSEXP, SEXP max_timeSEXP, SEXP cgmaxSEXP) {
+List unsumcpp(Rcpp::NumericMatrix constraints, int target_ne, bool verbose, bool maxEdges, bool noReturn, long mct_schedule, long hot_time, double beta0, double betamax, double mu0, double cooling_rate, long max_time, double cgmax);
+RcppExport SEXP unsumnet_unsumcpp(SEXP constraintsSEXP, SEXP target_neSEXP, SEXP verboseSEXP, SEXP maxEdgesSEXP, SEXP noReturnSEXP, SEXP mct_scheduleSEXP, SEXP hot_timeSEXP, SEXP beta0SEXP, SEXP betamaxSEXP, SEXP mu0SEXP, SEXP cooling_rateSEXP, SEXP max_timeSEXP, SEXP cgmaxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type constraints(constraintsSEXP);
     Rcpp::traits::input_parameter< int >::type target_ne(target_neSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< bool >::type maxEdges(maxEdgesSEXP);
     Rcpp::traits::input_parameter< bool >::type noReturn(noReturnSEXP);
     Rcpp::traits::input_parameter< long >::type mct_schedule(mct_scheduleSEXP);
@@ -37,7 +38,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type cooling_rate(cooling_rateSEXP);
     Rcpp::traits::input_parameter< long >::type max_time(max_timeSEXP);
     Rcpp::traits::input_parameter< double >::type cgmax(cgmaxSEXP);
-    __result = Rcpp::wrap(unsumcpp(constraints, target_ne, maxEdges, noReturn, mct_schedule, hot_time, beta0, betamax, mu0, cooling_rate, max_time, cgmax));
+    __result = Rcpp::wrap(unsumcpp(constraints, target_ne, verbose, maxEdges, noReturn, mct_schedule, hot_time, beta0, betamax, mu0, cooling_rate, max_time, cgmax));
     return __result;
 END_RCPP
 }

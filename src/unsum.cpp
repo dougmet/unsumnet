@@ -35,8 +35,9 @@ void setDHSeed(dense_hybrid *dh) {
 // the simulations, extracting the results and sending back to R.
 
 // [[Rcpp::export]]
-SEXP unsumcpp(Rcpp::NumericMatrix constraints,
+List unsumcpp(Rcpp::NumericMatrix constraints,
              int target_ne,
+             bool verbose,
              bool maxEdges,
              bool noReturn,
              long  mct_schedule,
@@ -56,7 +57,7 @@ SEXP unsumcpp(Rcpp::NumericMatrix constraints,
     int nn = constraints.nrow();
     dense_hybrid *dh; // everything happens in this object
     
-    dh = new dense_hybrid(nn, target_ne, maxEdges, noReturn);
+    dh = new dense_hybrid(nn, target_ne, verbose, maxEdges, noReturn);
     
     // Set a really big RNG seed. This is the best way I have so far of
     // coupling the R RNG state with C without everything crashing.
@@ -86,7 +87,8 @@ SEXP unsumcpp(Rcpp::NumericMatrix constraints,
       
       checkUserInterrupt(); // This should happen in dense_hybrid but to be sure
       
-      Rcout << "Result=" << result << endl;
+      if(verbose)
+        Rcout << "Result=" << result << endl;
       resultSums[result] ++;
     }
         

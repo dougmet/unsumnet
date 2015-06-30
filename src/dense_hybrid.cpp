@@ -1,6 +1,7 @@
 #include "dense_hybrid.h"
 
 dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
+                           bool verbose_in,
                            bool inMAXEDGES,
                            bool inNORETURN)
 {
@@ -8,6 +9,7 @@ dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
     //// CREATE THE ARRAYS ////
     ///////////////////////////
     
+    verbose = verbose_in;
     MAXEDGES = inMAXEDGES;
     NORETURN = inNORETURN;
     
@@ -193,7 +195,13 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
 			if ((mct%(10*mct_schedule))==0)
             {
 #ifdef BUILD_FOR_R
-                Rcpp::Rcout <<  "  t=" << mct << ", beta=" << beta << ", step=" << move[2]->step << ":" << move[2]->success_rate << ", E=" << energy/nn << ", ne=" << ne << ":" << move[0]->success_rate << ":" << move[1]->success_rate << " rw" << move[3]->success_rate << ":" << move[4]->success_rate << endl;
+                if(verbose) {
+                    Rcpp::Rcout <<  "  t=" << mct << ", beta=" << beta
+                    << ", step=" << move[2]->step << ":" << move[2]->success_rate
+                    << ", E=" << energy/nn << ", ne=" << ne << ":" << move[0]->success_rate
+                    << ":" << move[1]->success_rate << " rw" << move[3]->success_rate
+                    << ":" << move[4]->success_rate << endl;
+                }
 #endif
                 
             
@@ -217,7 +225,8 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
 				if (mct==hot_time)
 				{
 #ifdef BUILD_FOR_R
-					Rcpp::Rcout << "End of hot_time" << endl;
+					if(verbose)
+                        Rcpp::Rcout << "End of hot_time" << endl;
 #endif
 					energy = total_energy();
 				}                
@@ -262,7 +271,8 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                             if (ne==target_ne)
                             {
 #ifdef BUILD_FOR_R
-                                Rcpp::Rcout << "Switching off insertions/deletions." << endl;
+                                if(verbose)
+                                    Rcpp::Rcout << "Switching off insertions/deletions." << endl;
 #endif
                                 goforquench=true;
                                 // Switch off insertions/deletions, we'll stick with this config
@@ -278,7 +288,8 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                         if (rowcol_iterate())
                         {
 #ifdef BUILD_FOR_R
-                            Rcpp::Rcout << "Freezing edge swaps." << endl;
+                            if(verbose)
+                                Rcpp::Rcout << "Freezing edge swaps." << endl;
 #endif
                             move[3]->NperMC=move[4]->NperMC=0;
                         }
@@ -745,7 +756,8 @@ void dense_hybrid::reset_arrays()
         if (target_out[i]>1e-12) energy += pow((target_out[i]-sum_out[i])/top[i],2); // initialise energy, remember all edges are off
     }
 #ifdef BUILD_FOR_R
-    Rcpp::Rcout << "Energy(0)=" << energy << endl;
+    if(verbose)
+        Rcpp::Rcout << "Energy(0)=" << energy << endl;
 #endif
 }
 

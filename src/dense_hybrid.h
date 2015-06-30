@@ -77,11 +77,13 @@ public:
     double beta, mu;        // fields for energy and ne (beta is inverse temperature, beta=1/T)
     double cooling_rate;
     
+    bool verbose;           // Whether to print to screen or not
     bool MAXEDGES;          // If this is true then all possible edges are always on
     bool NORETURN;          // If this is true then no return edges are allowed.
     
     ////////// METHODS (AKA FUNCTIONS) //////////
     dense_hybrid(int nn_in, int target_ne_in,
+                 bool verbose_in,
                  bool inMAXEDGES,
                  bool inNORETURN); // constructor
     
