@@ -1,3 +1,3 @@
-useDynLib(banknet)
+useDynLib(unsumnet)
 exportPattern("^[[:alpha:]]+")
 importFrom(Rcpp, evalCpp)
