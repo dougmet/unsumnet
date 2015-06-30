@@ -3,5 +3,4 @@
 .RData
 .Rbuildignore
 unsumnet.Rproj
-MersenneTwister.h
 inst/doc

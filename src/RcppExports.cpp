@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // maxEntropyCpp
 NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs, double minError);
-RcppExport SEXP banknet_maxEntropyCpp(SEXP awSEXP, SEXP rsSEXP, SEXP csSEXP, SEXP minErrorSEXP) {
+RcppExport SEXP unsumnet_maxEntropyCpp(SEXP awSEXP, SEXP rsSEXP, SEXP csSEXP, SEXP minErrorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -21,7 +21,7 @@ END_RCPP
 }
 // unsumcpp
 SEXP unsumcpp(Rcpp::NumericMatrix constraints, int target_ne, bool maxEdges, bool noReturn, long mct_schedule, long hot_time, double beta0, double betamax, double mu0, double cooling_rate, long max_time, double cgmax);
-RcppExport SEXP banknet_unsumcpp(SEXP constraintsSEXP, SEXP target_neSEXP, SEXP maxEdgesSEXP, SEXP noReturnSEXP, SEXP mct_scheduleSEXP, SEXP hot_timeSEXP, SEXP beta0SEXP, SEXP betamaxSEXP, SEXP mu0SEXP, SEXP cooling_rateSEXP, SEXP max_timeSEXP, SEXP cgmaxSEXP) {
+RcppExport SEXP unsumnet_unsumcpp(SEXP constraintsSEXP, SEXP target_neSEXP, SEXP maxEdgesSEXP, SEXP noReturnSEXP, SEXP mct_scheduleSEXP, SEXP hot_timeSEXP, SEXP beta0SEXP, SEXP betamaxSEXP, SEXP mu0SEXP, SEXP cooling_rateSEXP, SEXP max_timeSEXP, SEXP cgmaxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
