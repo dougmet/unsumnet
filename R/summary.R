@@ -18,4 +18,29 @@ summary.unsumnet <- function(x) {
   cat("Edge weight summary\n")
   summary(edgeWeights)
   
+  if (ncol(x$AW)<=10) {
+    print(x$AW)
+  } else {
+    cat("\nTop 10 rows/cols")
+    print(x$AW[1:10,1:10])
+  }
+  
+}
+
+#' Print method for \code{unsumnet}
+#'
+#' @param x and object, usually generated from \code{\link{unsum}}.
+#'
+#' @export
+print.unsumnet <- function(x) {
+  nNodes <- nrow(x$A)
+  cat("Reconstructed matrix for", nNodes, "nodes.\n\n")
+  cat("Number of edges: ", x$targetEdges, "\n")
+
+  if (ncol(x$AW)<=10) {
+    print(x$AW)
+  } else {
+    cat("\nTop 10 rows/cols")
+    print(x$AW[1:10,1:10])
+  }
 }

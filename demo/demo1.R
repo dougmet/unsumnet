@@ -2,7 +2,7 @@
 
 set.seed(17)
 constraints <- matrix(rep(c(10,6,6,4,2,1),2),ncol=2)
-fit <- unsum(constraints, 12)
+fit <- unsum(constraints, 12, verbose=TRUE)
 
 library(igraph)
 g <- graph.adjacency(fit$AW, weighted = TRUE)
