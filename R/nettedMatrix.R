@@ -3,43 +3,28 @@
 #' @description Subtract the transpose and keep positive elements of a weighted
 #' adjacency matrix.
 #'
-#' @param w A square numeric matrix
-#'
-#' @return A numeric matrix with the positive elements of w-w'
+#' @param x A square numeric matrix or an object of class unsumnet
+#' @return A numeric matrix with the positive elements of x-x' (or x$AW - x$AW' fir unsumnet object)
 #' @export
 #'
-nettedMatrix <- function(w) UseMethod("nettedMatrix")
+nettedMatrix <- function(x) UseMethod("nettedMatrix")
 
-#' @title Calculate the netted matrix (default)
-#'
-#' @description Subtract the transpose and keep positive elements of a weighted
-#' adjacency matrix.
-#'
-#' @param w A square numeric matrix
-#'
-#' @return A numeric matrix with the positive elements of w-w'
+#' @rdname nettedMatrix
+#' @S3method nettedMatrix default
 #' @export
-#'
-nettedMatrix.default <- function(w) {
+nettedMatrix.default <- function(x) {
   
-  if(!is.matrix(w) | !is.numeric(w)) stop("Must be a numeric matrix")
-  if(nrow(w) != ncol(w)) stop("Must be square matrix")
+  if(!is.matrix(x) | !is.numeric(x)) stop("Must be a numeric matrix")
+  if(nrow(x) != ncol(x)) stop("Must be square matrix")
     
-  wOut <- w - t(w)
+  wOut <- x - t(x)
   
   return(wOut * (wOut>0))
 }
 
-#' @title Calculate the netted matrix (default)
-#'
-#' @description Subtract the transpose and keep positive elements of a weighted
-#' adjacency matrix.
-#'
-#' @param x An \code{unsumnet} object usually from \code{\link{unsum}}.
-#'
-#' @return A numeric matrix with the positive elements of aw-aw'
+#' @rdname nettedMatrix
+#' @S3method nettedMatrix unsumnet
 #' @export
-#'
 nettedMatrix.unsumnet <- function(x) {
   nettedMatrix.default(x$AW)
 }
