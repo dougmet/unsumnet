@@ -1,10 +1,10 @@
 #' @title Calculate the netted matrix
 #'
-#' @description Subtract the transpose and keep positive elements of a weighted
+#' @description Subtract the transpose and set negative elements to zero for a weighted
 #' adjacency matrix.
 #'
 #' @param x A square numeric matrix or an object of class unsumnet
-#' @return A numeric matrix with the positive elements of x-x' (or x$AW - x$AW' fir unsumnet object)
+#' @return A numeric matrix with the positive elements of x-x' (or x$AW - x$AW' fir unsumnet object) and zero for negative elements 
 #' @export
 #'
 nettedMatrix <- function(x) UseMethod("nettedMatrix")
@@ -19,6 +19,7 @@ nettedMatrix.default <- function(x) {
     
   wOut <- x - t(x)
   
+  # set negative elements to zero and return
   return(wOut * (wOut>0))
 }
 
