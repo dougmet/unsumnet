@@ -2,18 +2,28 @@
 % Please edit documentation in R/nettedMatrix.R
 \name{nettedMatrix}
 \alias{nettedMatrix}
+\alias{nettedMatrix.default}
+\alias{nettedMatrix.unsumnet}
 \title{Calculate the netted matrix}
 \usage{
-nettedMatrix(w)
+nettedMatrix(x)
+
+\method{nettedMatrix}{default}(x)
+
+\method{nettedMatrix}{unsumnet}(x)
 }
 \arguments{
-\item{w}{A square numeric matrix}
+\item{x}{A square numeric matrix or an object of class \code{unsumnet}}
 }
 \value{
-A numeric matrix with the positive elements of w-w'
+A numeric matrix with the positive elements of x-x' (or x$AW - x$AW'
+for \code{unsumnet} object) and zero for negative elements.
 }
 \description{
-Subtract the transpose and keep positive elements of a weighted
+Subtract the transpose and set negative elements to zero for a weighted
 adjacency matrix.
+}
+\examples{
+nettedMatrix(matrix(rnorm(25), nrow=5))
 }
 

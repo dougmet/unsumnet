@@ -3,15 +3,17 @@
 #' @description Subtract the transpose and set negative elements to zero for a weighted
 #' adjacency matrix.
 #'
-#' @param x A square numeric matrix or an object of class unsumnet
-#' @return A numeric matrix with the positive elements of x-x' (or x$AW - x$AW' fir unsumnet object) and zero for negative elements 
+#' @param x A square numeric matrix or an object of class \code{unsumnet}
+#' @return A numeric matrix with the positive elements of x-x' (or x$AW - x$AW'
+#' for \code{unsumnet} object) and zero for negative elements.
 #' @export
 #'
 nettedMatrix <- function(x) UseMethod("nettedMatrix")
 
 #' @rdname nettedMatrix
-#' @S3method nettedMatrix default
 #' @export
+#' @examples
+#' nettedMatrix(matrix(rnorm(25), nrow=5))
 nettedMatrix.default <- function(x) {
   
   if(!is.matrix(x) | !is.numeric(x)) stop("Must be a numeric matrix")
@@ -24,7 +26,6 @@ nettedMatrix.default <- function(x) {
 }
 
 #' @rdname nettedMatrix
-#' @S3method nettedMatrix unsumnet
 #' @export
 nettedMatrix.unsumnet <- function(x) {
   nettedMatrix.default(x$AW)
