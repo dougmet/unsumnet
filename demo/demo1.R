@@ -34,8 +34,8 @@ plotUnsum <- function(aw) {
 }
 
 plotUnsum(fit$AW)
-plotUnsum(ATrue)
-
+plotUnsum(neastTrue)
+plotUnsum(maxEntropy(neast))
 
 # This is a neat example where maxEntropy is rubbish.
 set.seed(33)

@@ -2,18 +2,29 @@
 % Please edit documentation in R/maxEntropy.R
 \name{maxEntropy}
 \alias{maxEntropy}
+\alias{maxEntropy.data.frame}
+\alias{maxEntropy.numeric}
 \title{Find the so-called maximum entropy solution}
 \usage{
-maxEntropy(rs, cs, minError = 1e-18)
+maxEntropy(data, ...)
+
+\method{maxEntropy}{data.frame}(data, ...)
+
+\method{maxEntropy}{numeric}(rs, cs, minError = 1e-18)
 }
 \arguments{
-\item{rs}{NumericVector the row sums of the matrix}
+\item{data}{a data.frame object containing row sums (first) and column sums
+(second) and optionally a vector of node names in any column. The row and
+column sums are extracted and passed to maxEntropy.numeric}
 
-\item{cs}{NumericVector the column sums of the matrix}
+\item{rs}{NumericVector the row sums of the matrix.}
+
+\item{cs}{NumericVector the column sums of the matrix.}
 }
 \value{
 A matrix that satisfies the row and column sum constraints or FALSE
- if the algorithm failed to converge
+ if the algorithm failed to converge. Dimension names will be pulled through
+ if available from the \code{data} or from the names of \code{rs}.
 }
 \description{
 The maximum entropy solution is obtained by spreading the edge
@@ -23,5 +34,9 @@ that have a zero row (column) sum in the input.
 
 Missing values are allowed but will result in a warning. The usefulness of
 such results is up to the user.
+}
+\examples{
+maxEntropy(neast)
+maxEntropy(neast$outSums, neast$inSums)
 }
 
