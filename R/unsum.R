@@ -123,6 +123,11 @@ unsum <- function(constraints,
   usum$targetEdges <- nEdges
   usum$nEdges <- sum(usum$A)
   
+  if(!is.null(dimnames(constraints))) {
+    dimnames(usum$AW) <- list(dimnames(constraints)[[1]],
+                              dimnames(constraints)[[1]])
+  }
+  
   return(usum)
   
 }
