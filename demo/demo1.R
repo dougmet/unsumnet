@@ -1,13 +1,40 @@
 ## TO BE CONVERTED TO VIGNETTE
 
-set.seed(17)
-constraints <- matrix(rep(c(10,6,6,4,2,1),2),ncol=2)
-fit <- unsum(constraints, 12, verbose=TRUE)
+nodeNames <- c("Boro Bank", "Cook and Rea", "Bank of Whitby",
+               "Priory Capital", "North Yorks Bank", "Redcar Group")
+
+neastTrue <- rbind(c(0, 12.0, 1.2, 0, 1, 0),
+               c(8.0, 0, 5.0, 0, 2.3, 1.5),
+               c(4.1, 2.2, 1.0, 0, 0, 0),
+               c(0.5, 0, 0, 0, 0.5, 0),
+               c(0, 0, 0.3, 0, 0, 1.3),
+               c(0, 2.0, 0, 0, 0, 0))
+
+dimnames(neastTrue) <- list(nodeNames, nodeNames)
+
+neastTrue
+rowSums(neastTrue)
+colSums(neastTrue)
+neast <- data.frame(nodeNames, outSums=rowSums(neastTrue), inSums=colSums(neastTrue))
+
+fit <- unsum(neast, 12, verbose=TRUE)
 
 library(igraph)
-g <- graph.adjacency(fit$AW, weighted = TRUE)
-lo <- layout.circle(g)
-plot(g, edge.width=E(g)$weight, edge.curved=is.mutual(g), layout=lo)
+
+plotUnsum <- function(aw) {
+  g <- graph.adjacency(aw, weighted = TRUE)
+  V(g)$size <- 50
+  V(g)$color <- 'gold'
+  if(!is.null(dimnames(aw)))
+    V(g)$label <- dimnames(aw)[[1]]
+  lo <- layout.circle(g)
+  sw <- sum(aw)/50
+  plot(g, edge.width=E(g)$weight/sw, edge.curved=is.mutual(g), layout=lo,
+       margin=c(0,0,0,0))
+}
+
+plotUnsum(fit$AW)
+plotUnsum(ATrue)
 
 
 # This is a neat example where maxEntropy is rubbish.
