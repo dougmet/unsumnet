@@ -18,11 +18,14 @@ summary.unsumnet <- function(x) {
   cat("Edge weight summary\n")
   summary(edgeWeights)
   
-  if (ncol(x$AW)<=10) {
+  od <- options(digits=3)
+  on.exit(options(od))
+  
+  if (ncol(x$AW)<=20) {
     print(x$AW)
   } else {
-    cat("\nTop 10 rows/cols")
-    print(x$AW[1:10,1:10])
+    cat("\nFirst 20 rows/cols")
+    print(x$AW[1:20,1:20])
   }
   
 }
@@ -37,10 +40,15 @@ print.unsumnet <- function(x) {
   cat("Reconstructed matrix for", nNodes, "nodes.\n\n")
   cat("Number of edges: ", x$targetEdges, "\n")
 
-  if (ncol(x$AW)<=10) {
+  
+  od <- options(digits=3)
+  on.exit(options(od))
+  
+  if (ncol(x$AW)<=20) {
     print(x$AW)
   } else {
-    cat("\nTop 10 rows/cols")
-    print(x$AW[1:10,1:10])
+    cat("\nFirst 20 rows/cols")
+    print(x$AW[1:20,1:20])
   }
+  
 }
