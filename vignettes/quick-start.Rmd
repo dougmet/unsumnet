@@ -11,27 +11,35 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-Intro paragraph
+There are many networks that we are interested in for which we only have aggregated data instead of the full structure. For example, in financial networks we often know the balance sheets (total assets and liabilities) of the individual institutions without knowing detailed exposure.
 
-## Aggregated Data
+In matrix notation, the information we have is the row and column sums of the weighted adjacency network, $AW_{ij}$.
 
-Data comes in in a summed up way. Either load an example data set or make a matrix and sum it.
+$$ R_i = \sum_j AW_{ij} $$
+$$ C_i = \sum_j AW_{ji} $$
+
+In general there are many possible networks that could satisfy these constraints. The aim of the `unsumnet` package is to evenly sample from these networks while allowing the user to choose the sparsity (number of edges).
+
+As a demonstation consider the following fictional banking system. The true loans network is a weighted adjacency matrix as below
+
 ```{r}
 library(unsumnet)
 
-set.seed(34)
-nodeNames <- LETTERS[1:6]
-a <- matrix(sample(0:1, 36, prob = c(0.7,0.3), replace=TRUE), ncol=6)
-diag(a) <- 0
-awTrue <- a * abs(rnorm(36, 40, 15))
-
-dimnames(awTrue) <- list(nodeNames, nodeNames)
-awTrue
-
-
+neastTrue
 ```
 
+## Creating a network
+
 ```{r}
+set.seed(11)
+fit <- unsum(neast, 12)
+fit$AW
+```
+
+The following settings allow us to see the network with the `igraph` package
+
+```{r}
+library(igraph)
 plotUnsum <- function(aw) {
   g <- graph.adjacency(aw, weighted = TRUE)
   V(g)$size <- 50
@@ -43,47 +51,22 @@ plotUnsum <- function(aw) {
   plot(g, edge.width=E(g)$weight/sw, edge.curved=is.mutual(g), layout=lo,
        margin=c(0,0,0,0))
 }
+
+plotUnsum(fit$AW)
 ```
 
 
-Start with a 
 
-```{r}
-constraints <- data.frame(nodeNames=nodeNames, totalOut=rowSums(awTrue), totalIn=colSums(awTrue))
-constraints
-```
 
-## Creating a network
-
-```{r}
-set.seed(11)
-fit <- unsum(constraints, 12)
-fit$AW
-```
 
 Run through unsum and a few easy options. One with all the defaults, one with a few more options set.
 
 ## Maximum Entropy Solution
 
 ```{r, fig.show='hold', fig.cap="hello"}
-library(igraph)
-plotUnsum(awTrue)
-awME <- maxEntropy(constraints$totalOut,constraints$totalIn)
-dimnames(awME) <- list(nodeNames,nodeNames)
-plotUnsum(awME)
+plotUnsum(neastTrue)
+neastME <- maxEntropy(neast)
+plotUnsum(neastME)
 ```
 
-
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## Doug Remove
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
 
