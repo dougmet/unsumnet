@@ -14,6 +14,8 @@
 #' column sums are extracted and passed to maxEntropy.numeric
 #' @param rs NumericVector the row sums of the matrix.
 #' @param cs NumericVector the column sums of the matrix.
+#' @param minError Numeric. The algorithm will keep iterating until the mean squared 
+#' error against the constraints drops below this value.
 #'
 #' @return A matrix that satisfies the row and column sum constraints or FALSE
 #'  if the algorithm failed to converge. Dimension names will be pulled through
@@ -68,7 +70,6 @@ maxEntropy.numeric <- function(rs, cs, minError=1e-18) {
     return(FALSE)
   }
     
-  
   # Calculate the final row/col sums
   csaw <- colSums(aw)
   rsaw <- rowSums(aw)
