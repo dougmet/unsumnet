@@ -1,12 +1,12 @@
 ---
-title: "`unsumnet` Quick Start"
+title: "`unsumnet` Introduction"
 author: "Douglas Ashton"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     fig_caption: yes
 vignette: >
-  %\VignetteIndexEntry{Quick Start}
+  %\VignetteIndexEntry{Introduction}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
