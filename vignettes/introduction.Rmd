@@ -20,20 +20,37 @@ $$ C_i = \sum_j AW_{ji} $$
 
 In general there are many possible networks that could satisfy these constraints. The aim of the `unsumnet` package is to evenly sample from these networks while allowing the user to choose the sparsity (number of edges).
 
-As a demonstation consider the following fictional banking system. The true loans network is a weighted adjacency matrix as below
+## Aggregated Data
+
+Consider the following fictional banking system. It consists of six banks and we know the total outgoing commitments (loans made) and incoming commitments (loans received).
+
+```{r echo=FALSE}
+options(digits = 2)
+```
+
 
 ```{r}
 library(unsumnet)
-
-neastTrue
+neast
 ```
 
+These values are the row and column sums of an unknown matrix, `rowSums(neastTrue)` and `colSums(neastTrue)`. The primary function of this package is to find networks that fit these summed data. We wish to "unsum" the network.
+
 ## Creating a network
+
+The `unsum` function allows us to explore networks with the number of edges, `nEdges` as a control parameter. To make one network with 12 edges we simply call
 
 ```{r}
 set.seed(11)
 fit <- unsum(neast, 12)
+
+# The weighted adjacency matrix
 fit$AW
+
+# Check it matches the constraints
+rowSums(fit$AW)
+colSums(fit$AW)
+
 ```
 
 The following settings allow us to see the network with the `igraph` package
@@ -47,7 +64,7 @@ plotUnsum <- function(aw) {
   if(!is.null(dimnames(aw)))
     V(g)$label <- dimnames(aw)[[1]]
   lo <- layout.circle(g)
-  sw <- sum(aw)/50
+  sw <- mean(aw)/2
   plot(g, edge.width=E(g)$weight/sw, edge.curved=is.mutual(g), layout=lo,
        margin=c(0,0,0,0))
 }
@@ -56,10 +73,6 @@ plotUnsum(fit$AW)
 ```
 
 
-
-
-
-Run through unsum and a few easy options. One with all the defaults, one with a few more options set.
 
 ## Maximum Entropy Solution
 
