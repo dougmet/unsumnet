@@ -26,7 +26,7 @@
 #' every \code{mctSchedule} loops.
 #' @param maxTime The maximum number of loops before giving up on that quench and
 #' starting again.
-#' @param minError When the error drops below this threshold it is decided that it
+#' @param minError When the mean error drops below this threshold it is decided that it
 #' is close enough to a solution. The remaining error is resolved using the row/col
 #' iterator. A bigger number will give better performance but risks skewing the
 #' distribution of networks.

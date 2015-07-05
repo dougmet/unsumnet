@@ -18,11 +18,11 @@ In matrix notation, the information we have is the row and column sums of the we
 $$ R_i = \sum_j AW_{ij} $$
 $$ C_i = \sum_j AW_{ji} $$
 
-In general there are many possible networks that could satisfy these constraints. The aim of the `unsumnet` package is to evenly sample from these networks while allowing the user to choose the sparsity (number of edges).
+In general there are many possible networks that could satisfy these constraints. The aim of the `unsumnet` package is to use methods fro mstatistical mechanics to evenly sample from these networks while allowing the user to choose the sparsity (number of edges).
 
 ## Aggregated Data
 
-Consider the following fictional banking system. It consists of six banks and we know the total outgoing commitments (loans made) and incoming commitments (loans received).
+Consider the following fictional banking system. It consists of six banks and they form a closed network of loans, which is represented by the weighted adkacency matrix, `neastTrue`,
 
 ```{r echo=FALSE}
 options(digits = 2)
@@ -31,10 +31,16 @@ options(digits = 2)
 
 ```{r}
 library(unsumnet)
+neastTrue
+```
+
+In reality this network is rarely known. It is much more common to have the aggregated data set, where the aggregation is the rowSums, `outSum=rowSums(neastTrue)` for outgoing loans and colSums `inSum=colSums(neastTrue)` for incoming loans.
+
+```{r}
 neast
 ```
 
-These values are the row and column sums of an unknown matrix, `rowSums(neastTrue)` and `colSums(neastTrue)`. The primary function of this package is to find networks that fit these summed data. We wish to "unsum" the network.
+The primary function of this package is to find networks that fit these summed data. We wish to "unsum" the network.
 
 ## Creating a network
 
@@ -43,43 +49,68 @@ The `unsum` function allows us to explore networks with the number of edges, `nE
 ```{r}
 set.seed(11)
 fit <- unsum(neast, 12)
-
-# The weighted adjacency matrix
-fit$AW
-
-# Check it matches the constraints
-rowSums(fit$AW)
-colSums(fit$AW)
-
 ```
 
-The following settings allow us to see the network with the `igraph` package
+This returns an `unsumnet` object. The standard adjacency matrix is held in `fit$A` and the weighted adjacency matrix is `fit$AW`. The returned matrix will not be the same as the true network, but given the information we have it is equally likely because it satifies the constraints.
 
 ```{r}
-library(igraph)
-plotUnsum <- function(aw) {
-  g <- graph.adjacency(aw, weighted = TRUE)
-  V(g)$size <- 50
-  V(g)$color <- 'gold'
-  if(!is.null(dimnames(aw)))
-    V(g)$label <- dimnames(aw)[[1]]
-  lo <- layout.circle(g)
-  sw <- mean(aw)/2
-  plot(g, edge.width=E(g)$weight/sw, edge.curved=is.mutual(g), layout=lo,
-       margin=c(0,0,0,0))
-}
-
-plotUnsum(fit$AW)
+fit$AW
 ```
 
+The plotUnsum method will plot a matrix and the S3 plot method will do the same for an `unsumnet` object.
+
+```{r, fig.show='hold', fig.cap="True network compared to `unsumnet` reconstructed network"}
+plotUnsum(neastTrue, main="True network")
+plot(fit, main="Reconstructed network")
+```
 
 
 ## Maximum Entropy Solution
 
-```{r, fig.show='hold', fig.cap="hello"}
-plotUnsum(neastTrue)
+A commonly used solution for such aggregated data is known as the "maximum entropy" solution. The term is a little confusing from a statistical mechanics perspective but in this case it uses every possible edge and spreads out the weights as evenly as possible. The maximum entropy solution is provided by the `maxEntropy` function. It takes the same inputs as `unsum`. In our example this looks quite different to the true network.
+
+```{r, fig.show='hold', fig.cap="True network compared to maximum entropy network"}
+# Get the maximum entropy network
 neastME <- maxEntropy(neast)
-plotUnsum(neastME)
+# Compare to the true network
+plotUnsum(neastTrue, main="True network")
+plotUnsum(neastME, main="Max Entropy")
 ```
 
+If no solution is possible then this function will return `FALSE`. This can be useful for testing impossible constraints.
 
+## Netted matrix
+
+In stability terms it is often the netted positions that are more relevant. This is provided by the `nettedMatrix` function. It keeps the positive elements $(AW-AW')_+$.
+
+```{r}
+plotUnsum(nettedMatrix(neastTrue))
+```
+
+## Extra notes on `unsum`
+
+For large networks you might find the algorithm can take a very long time. The runtime is proportional to the number of edges. For very large networks with many edges it may become unusuable depending on the complexity of the constraints.
+
+Another tricky case is when you ask for very few edges. This makes it harder to find solutions and the algorithm can become trapped in local minima (see below for how to prevent this). For example calling
+
+```{r eval=FALSE}
+unsum(neast, 9, verbose=TRUE) # won't converge
+```
+
+and will run around again and again.
+
+The `unsum` function has many parameters with default values. These are detailed in the help page `?unsum` but the most common ones you might need to vary are below. `unsum` uses simulated annealing and this can take delicate tweaking of parameters if solutions are difficult to get.
+
+- `verbose`: Set this to `TRUE` if you want the algorithm to print to screen how its doing. Useful for big networks where it can take a long time to run.
+
+- `coolingRate`: This is an important parameter, it sets the rate of cooling. Each `mctSchedule` time steps the temperature is reduced by this factor. If it is too big then the quench will become trapped in a local minimum (an energy plateau). Too close to 1 and the simulation will take a long time.
+
+- `minError`: The mean squared error that the algorithm must get to before returning. This should be left alone unless you are really struggling to get a solution. If it's too big then the distribution risks becoming skewed.
+
+- `maxEdges`: If you set this to true *all* edges possible edges are switched on.
+
+- `noReturn`: If this is `TRUE` then no return edges are allowed. Essentially it's a netted matrix by construction.
+
+## Final note
+
+This package is very new and will likely change. There are some known stability issues, if you find a reproducible problem then leave an issue on the [GitHub page](https://www.github.com/dougmet/unsumnet/) Other control parameters, such as controlling for known netted positions will be coming soon.
