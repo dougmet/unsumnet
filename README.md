@@ -1,5 +1,21 @@
-# Reconstructing Interbank Lending Networks
+# `unsumnet` Reconstructing networks from aggregated data.
 
-Welcome to the unsumnet project.
+Welcome to the `unsumnet` project.
 
-The purpose of this project is to generate an ensemble of bank lending networks that satisfies a series of constraints provided by the user. The code is all in C++ and is documented in the [wiki](https://bitbucket.org/dougashton/banknet/wiki/Home)
+This project is an R interface to a C++ project to solve aggregated network data using simulated annealing. It is in heavy development but feel free to try it out now. If you find reproducible problems that have not already been raised then please create a ticket on the issues page.
+
+To install from R you will need devtools installed:
+```
+install.packages("devtools")
+```
+
+and then run
+
+```
+library(devtools)
+install_github("dougmet/unsumnet")
+```
+
+There's a vignette already to help you get started.
+
+
