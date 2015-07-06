@@ -16,6 +16,7 @@
 #' @param cs NumericVector the column sums of the matrix.
 #' @param minError Numeric. The algorithm will keep iterating until the mean squared 
 #' error against the constraints drops below this value.
+#' @param ... extra arguments passed to \code{\link{maxEntropy.numeric}}
 #'
 #' @return A matrix that satisfies the row and column sum constraints or FALSE
 #'  if the algorithm failed to converge. Dimension names will be pulled through
