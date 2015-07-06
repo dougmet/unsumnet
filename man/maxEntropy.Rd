@@ -20,6 +20,9 @@ column sums are extracted and passed to maxEntropy.numeric}
 \item{rs}{NumericVector the row sums of the matrix.}
 
 \item{cs}{NumericVector the column sums of the matrix.}
+
+\item{minError}{Numeric. The algorithm will keep iterating until the mean squared
+error against the constraints drops below this value.}
 }
 \value{
 A matrix that satisfies the row and column sum constraints or FALSE

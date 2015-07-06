@@ -21,10 +21,10 @@ plot.unsumnet <- function(x, ...) {
 #' @param aw a matrix
 #' @param ... 
 #'
-#' @return
 #' @export
 #'
 #' @examples
+#' plotUnsum(rbind(c(0,1,2),c(0,0,1), c(1,0,0))
 plotUnsum <- function(aw, ...) {
   
   if (!requireNamespace("igraph", quietly = TRUE)) {
