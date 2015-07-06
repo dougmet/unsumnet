@@ -22,4 +22,4 @@ There's a vignette already to help you get started. If you used the `build_vigne
 vignette("introduction", package="unsumnet")
 ```
 
-
+A copy of this is in the wiki page [Introduction](https://github.com/dougmet/unsumnet/wiki/Introduction)
