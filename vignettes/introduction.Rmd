@@ -18,7 +18,7 @@ In matrix notation, the information we have is the row and column sums of the we
 $$ R_i = \sum_j AW_{ij} $$
 $$ C_i = \sum_j AW_{ji} $$
 
-In general there are many possible networks that could satisfy these constraints. The aim of the `unsumnet` package is to use methods fro mstatistical mechanics to evenly sample from these networks while allowing the user to choose the sparsity (number of edges).
+In general there are many possible networks that could satisfy these constraints. The aim of the `unsumnet` package is to use methods from statistical mechanics to evenly sample from these networks while allowing the user to choose the sparsity (number of edges).
 
 ## Aggregated Data
 
