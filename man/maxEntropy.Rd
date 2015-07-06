@@ -40,6 +40,6 @@ such results is up to the user.
 }
 \examples{
 maxEntropy(neast)
-maxEntropy(neast$outSums, neast$inSums)
+maxEntropy(neast$outSum, neast$inSum)
 }
 

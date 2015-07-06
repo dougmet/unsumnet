@@ -44,7 +44,7 @@ maxEntropy.data.frame <- function(data, ...) {
 #' @rdname maxEntropy
 #' @export
 #' @examples
-#' maxEntropy(neast$outSums, neast$inSums)
+#' maxEntropy(neast$outSum, neast$inSum)
 maxEntropy.numeric <- function(rs, cs, minError=1e-18) {
 
   if(length(rs)!=length(cs)) stop("rs and cs must be same length")

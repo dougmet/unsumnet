@@ -9,13 +9,13 @@ plotUnsum(aw, ...)
 \arguments{
 \item{aw}{a matrix}
 
-\item{...}{}
+\item{...}{arguments passed through to \code{\link{plot.igraph}}}
 }
 \description{
 This will create a directed \code{igraph} network and call its
 plotting methods
 }
 \examples{
-plotUnsum(rbind(c(0,1,2),c(0,0,1), c(1,0,0))
+plotUnsum(rbind(c(0,1,2),c(0,0,1), c(1,0,0)))
 }
 
