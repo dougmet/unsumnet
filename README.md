@@ -13,7 +13,7 @@ and then run
 
 ```{r}
 library(devtools)
-install_github("dougmet/unsumnet", build_vignettes=TRUE)
+install_github(repo="unsumnet", username="dougmet", build_vignettes=TRUE)
 ```
 
 There's a vignette already to help you get started. If you used the `build_vignettes=TRUE` argument then you can do
@@ -22,4 +22,4 @@ There's a vignette already to help you get started. If you used the `build_vigne
 vignette("introduction", package="unsumnet")
 ```
 
-
+A copy of this is in the wiki page [Introduction](https://github.com/dougmet/unsumnet/wiki/Introduction)
