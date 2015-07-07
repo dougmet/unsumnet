@@ -23,3 +23,4 @@ vignette("introduction", package="unsumnet")
 ```
 
 A copy of this is in the wiki page [Introduction](https://github.com/dougmet/unsumnet/wiki/Introduction)
+
