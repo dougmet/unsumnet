@@ -1,7 +1,13 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-
+//’ Calculated max entropy solution C++ code
+//’
+//’ @param aw NumericMatrix Initial matrix with the zero elements already fixed.
+//’ @param rs NumericVector Row sums.
+//’ @param rs NumericVector Column sums.
+//’ @param minError double minimum error for the iterator.
+//’ @return NumericMatrix with the solution or the result after 5000 iterations.
 // [[Rcpp::export]]
 NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs,
                             double minError) {

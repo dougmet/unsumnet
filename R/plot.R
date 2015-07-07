@@ -19,12 +19,12 @@ plot.unsumnet <- function(x, ...) {
 #' @description This will create a directed \code{igraph} network and call its
 #' plotting methods
 #' @param aw a matrix
-#' @param ... 
+#' @param ... arguments passed through to \code{\link{plot.igraph}}
 #'
-#' @return
 #' @export
 #'
 #' @examples
+#' plotUnsum(rbind(c(0,1,2),c(0,0,1), c(1,0,0)))
 plotUnsum <- function(aw, ...) {
   
   if (!requireNamespace("igraph", quietly = TRUE)) {

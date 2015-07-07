@@ -17,9 +17,14 @@ maxEntropy(data, ...)
 (second) and optionally a vector of node names in any column. The row and
 column sums are extracted and passed to maxEntropy.numeric}
 
+\item{...}{extra arguments passed to \code{\link{maxEntropy.numeric}}}
+
 \item{rs}{NumericVector the row sums of the matrix.}
 
 \item{cs}{NumericVector the column sums of the matrix.}
+
+\item{minError}{Numeric. The algorithm will keep iterating until the mean squared
+error against the constraints drops below this value.}
 }
 \value{
 A matrix that satisfies the row and column sum constraints or FALSE
@@ -37,6 +42,6 @@ such results is up to the user.
 }
 \examples{
 maxEntropy(neast)
-maxEntropy(neast$outSums, neast$inSums)
+maxEntropy(neast$outSum, neast$inSum)
 }
 
