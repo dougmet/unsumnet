@@ -77,24 +77,24 @@ dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
 
 dense_hybrid::~dense_hybrid()
 {
-    delete A;
-    delete W;
-    delete active_edges;
-    delete active_edges0;
-    delete target_out;
-    delete target_in;
-    delete sum_out;
-    delete sum_in;
-    delete on_out;
-    delete on_in;
-    delete top;
-    delete tip;
-    delete activeW;
-    delete gradW;
-    delete cg_g;
-    delete cg_h;
-    delete cg_sum_out;
-    delete cg_sum_in;
+    delete[] A;
+    delete[] W;
+    delete[] active_edges;
+    delete[] active_edges0;
+    delete[] target_out;
+    delete[] target_in;
+    delete[] sum_out;
+    delete[] sum_in;
+    delete[] on_out;
+    delete[] on_in;
+    delete[] top;
+    delete[] tip;
+    delete[] activeW;
+    delete[] gradW;
+    delete[] cg_g;
+    delete[] cg_h;
+    delete[] cg_sum_out;
+    delete[] cg_sum_in;
 }
 
 // Using std::vectors for compatibility outside. I appreciate the jarring
@@ -916,7 +916,7 @@ bool dense_hybrid::rowcol_iterate()
 //    if (iter==5000)
 //        cout << "ROW-COL-ITER: FAIL " << iter << endl;
     
-    delete sumhold;
+    delete[] sumhold;
     
     return(success);
 }
