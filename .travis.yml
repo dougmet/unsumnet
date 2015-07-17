@@ -1,3 +1,6 @@
 language: r
 sudo: required
+branches:
+  except:
+    - debug_plateau
 
