@@ -89,7 +89,9 @@ public:
 
     double maxw,minw, scalew;    // restrict the range of Ws (careful!)
     long nn, vol;
-    long target_ne, ne, ne0;     // Target number of edges and actual number, number at end of hot time
+    long target_ne;         // Target number of edges
+    long max_ne;            // Size of edge arrays
+    long ne, ne0;           // actual number, number at end of hot time
     
     double beta, mu;        // fields for energy and ne (beta is inverse temperature, beta=1/T)
     double cooling_rate;

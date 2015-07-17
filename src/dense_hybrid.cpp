@@ -35,14 +35,22 @@ dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
     nn = nn_in;
     target_ne = target_ne_in;
     
+    // Set the size of the edge arrays
+    if (nn<=32)
+        max_ne = nn*nn;
+    else if (2*target_ne < 1024)
+        max_ne = 1024;
+    else
+        max_ne = 2*target_ne;
+    
     // They're 1D to keep pointers simple
     // I've put them in COLUMN-MAJOR format as this is compatible with blas and lapack
     // libraries incase we want eigenvectors etc.
     // To get element A_ij address A[i + j*nn]
     A = new int [nn*nn];
     W = new double [nn*nn];
-    active_edges = new long [target_ne*2];     // first ne elements give active edges
-    active_edges0 = new long [target_ne*2];    // For correlation functions
+    active_edges = new long [max_ne];     // first ne elements give active edges
+    active_edges0 = new long [max_ne];    // For correlation functions
     vol = nn*(nn-1);                           // total number of possible edges
     
     // These arrays store node properties
@@ -57,10 +65,10 @@ dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
     tip = new double [nn];
     
     // Conjugate gradient arrays
-    activeW= new double [target_ne*2];
-    gradW = new double [target_ne*2];
-    cg_g = new double [target_ne*2];
-    cg_h = new double [target_ne*2];
+    activeW= new double [max_ne];
+    gradW = new double [max_ne];
+    cg_g = new double [max_ne];
+    cg_h = new double [max_ne];
     cg_sum_out = new double [nn];
     cg_sum_in = new double [nn];
     
@@ -401,7 +409,7 @@ int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
                 {
                     int move_succeed=0;
                     
-                    if (A[k] == 0)
+                    if (A[k] == 0 && ne < max_ne)
                     {
                         if (A[j + i*nn] == 0 || !NORETURN)
                         {
