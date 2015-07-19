@@ -3,4 +3,5 @@ sudo: required
 branches:
   except:
     - debug_plateau
+    - netted
 
