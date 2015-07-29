@@ -2,7 +2,7 @@ Package: unsumnet
 Title: Solve Row and Column Sum Network Constraint Problems
 Version: 0.0.0.9000
 Authors@R: person("Douglas", "Ashton", email="douglas.j.ashton@gmail.com", role=c("aut","cre"))
-Description: What the package does (one paragraph)
+Description: For reconstructing weighted networks where you only have the sum of all outgoing edges and the sum of all incoming edges. This package will sample from all possible networks using ERGMs and simulated annealing.
 Depends: R (>= 3.1.2)
 License: GPL-3
 LazyData: true
