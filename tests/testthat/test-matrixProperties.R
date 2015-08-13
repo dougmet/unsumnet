@@ -1,5 +1,12 @@
 context('Calculating matrix properties')
 
+# Don't want to set the seed for this test, use the time in case anyone
+# set the seed upstream
+
+timeSeed <- as.integer(Sys.time())
+
+set.seed(timeSeed)
+
 test_that('calcMaxEdges correctly computes maximum number of edges', {
   for (i in 1:10000) {
     
@@ -14,6 +21,7 @@ test_that('calcMaxEdges correctly computes maximum number of edges', {
     if(c0) a[ , sample(1:8,c0)] <- 0
     if(r0) a[sample(1:8,r0) , ] <- 0
     
-    expect_equal(calcMaxEdges(rowSums(a), colSums(a)), sum(a>0))
+    expect_equal(calcMaxEdges(rowSums(a), colSums(a)), sum(a>0),
+                 info=paste0("Random seed was ", timeSeed, ", i=",i))
   }
 })
