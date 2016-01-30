@@ -20,4 +20,6 @@
 #'
 #' @docType package
 #' @name unsumnet
+#' @importFrom Rcpp evalCpp
+#' @useDynLib unsumnet
 NULL

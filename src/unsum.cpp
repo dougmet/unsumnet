@@ -34,6 +34,7 @@ void setDHSeed(dense_hybrid *dh) {
 // This function faces R. It creates a dense_hybrid object and launches
 // the simulations, extracting the results and sending back to R.
 
+//' @export
 // [[Rcpp::export]]
 List unsumcpp(Rcpp::NumericMatrix constraints,
              int target_ne,
