@@ -6,20 +6,19 @@
 \alias{maxEntropy.numeric}
 \title{Find the so-called maximum entropy solution}
 \usage{
-maxEntropy(data, ...)
+maxEntropy(rs, ...)
 
-\method{maxEntropy}{data.frame}(data, ...)
+\method{maxEntropy}{data.frame}(rs, ...)
 
-\method{maxEntropy}{numeric}(rs, cs, minError = 1e-18)
+\method{maxEntropy}{numeric}(rs, cs, minError = 1e-18, ...)
 }
 \arguments{
-\item{data}{a data.frame object containing row sums (first) and column sums
-(second) and optionally a vector of node names in any column. The row and 
-column sums are extracted and passed to maxEntropy.numeric}
+\item{rs}{Either a data.frame object containing row sums (first) and column sums
+(second) and optionally a vector of node names in any column. Or a vector of row
+sums only if the column sums, \code{cs}, are also supplied. For a data.frame 
+the row and column sums are extracted and passed to maxEntropy.numeric}
 
 \item{...}{extra arguments passed to \code{\link{maxEntropy.numeric}}}
-
-\item{rs}{NumericVector the row sums of the matrix.}
 
 \item{cs}{NumericVector the column sums of the matrix.}
 

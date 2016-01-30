@@ -9,7 +9,7 @@ plotUnsum(aw, ...)
 \arguments{
 \item{aw}{a matrix}
 
-\item{...}{arguments passed through to \code{\link{plot.igraph}}}
+\item{...}{arguments passed through to \code{plot.igraph}}
 }
 \description{
 This will create a directed \code{igraph} network and call its

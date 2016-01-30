@@ -4,11 +4,13 @@
 \alias{summary.unsumnet}
 \title{Summarising Unsummed Networks}
 \usage{
-\method{summary}{unsumnet}(x)
+\method{summary}{unsumnet}(object, ...)
 }
 \arguments{
-\item{x}{an object of class "unsumnet", usually from a call to
+\item{object}{object of class "unsumnet", usually from a call to
 \code{\link{unsum}}.}
+
+\item{...}{passed on to summary for numeric vectors}
 }
 \description{
 \code{\link{summary}} method for class "unsumnet"

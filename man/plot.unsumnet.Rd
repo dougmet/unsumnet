@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{an \code{unsumnet} object}
 
-\item{...}{extra options passed through to \code{\link{plot.igraph}}}
+\item{...}{extra options passed through to \code{plot.igraph}}
 }
 \description{
 Passes the weighted adjacency matrix to \code{\link{plotUnsum}}

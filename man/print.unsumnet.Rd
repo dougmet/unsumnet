@@ -4,10 +4,12 @@
 \alias{print.unsumnet}
 \title{Print method for \code{unsumnet}}
 \usage{
-\method{print}{unsumnet}(x)
+\method{print}{unsumnet}(x, ...)
 }
 \arguments{
-\item{x}{and object, usually generated from \code{\link{unsum}}.}
+\item{x}{an object, usually generated from \code{\link{unsum}}.}
+
+\item{...}{passed on to other print methods.}
 }
 \description{
 Print method for \code{unsumnet}

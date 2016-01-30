@@ -2,40 +2,42 @@
 #'
 #' @description \code{\link{summary}} method for class "unsumnet"
 #'
-#' @param x an object of class "unsumnet", usually from a call to
+#' @param object object of class "unsumnet", usually from a call to
 #' \code{\link{unsum}}.
+#' @param ... passed on to summary for numeric vectors
 #'
 #' @export
 #'
-summary.unsumnet <- function(x) {
+summary.unsumnet <- function(object, ...) {
   
-  nNodes <- nrow(x$A)
+  nNodes <- nrow(object$A)
   cat("Reconstructed matrix for", nNodes, "nodes.\n\n")
-  cat("Target number of edges: ", x$targetEdges, "\n")
-  cat("Actual number of edges: ", x$nEdges, "\n\n")
+  cat("Target number of edges: ", object$targetEdges, "\n")
+  cat("Actual number of edges: ", object$nEdges, "\n\n")
   
-  edgeWeights <- x$AW[x$A>0]
+  edgeWeights <- object$AW[object$A>0]
   cat("Edge weight summary\n")
-  summary(edgeWeights)
+  summary(edgeWeights, ...)
   
   od <- options(digits=3)
   on.exit(options(od))
   
-  if (ncol(x$AW)<=20) {
-    print(x$AW)
+  if (ncol(object$AW)<=20) {
+    print(object$AW)
   } else {
     cat("\nFirst 20 rows/cols")
-    print(x$AW[1:20,1:20])
+    print(object$AW[1:20,1:20])
   }
   
 }
 
 #' Print method for \code{unsumnet}
 #'
-#' @param x and object, usually generated from \code{\link{unsum}}.
+#' @param x an object, usually generated from \code{\link{unsum}}.
+#' @param ... passed on to other print methods.
 #'
 #' @export
-print.unsumnet <- function(x) {
+print.unsumnet <- function(x, ...) {
   nNodes <- nrow(x$A)
   cat("Reconstructed matrix for", nNodes, "nodes.\n\n")
   cat("Number of edges: ", x$targetEdges, "\n")
@@ -45,10 +47,10 @@ print.unsumnet <- function(x) {
   on.exit(options(od))
   
   if (ncol(x$AW)<=20) {
-    print(x$AW)
+    print(x$AW, ...)
   } else {
     cat("\nFirst 20 rows/cols")
-    print(x$AW[1:20,1:20])
+    print(x$AW[1:20,1:20], ...)
   }
   
 }

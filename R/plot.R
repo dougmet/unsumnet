@@ -5,7 +5,7 @@
 #' which is a wrapper around the igraph plot. You will need to install
 #' \code{igraph} to use this plot method.
 #' @param x an \code{unsumnet} object
-#' @param ... extra options passed through to \code{\link{plot.igraph}}
+#' @param ... extra options passed through to \code{plot.igraph}
 #'
 #' @export
 #'
@@ -19,7 +19,7 @@ plot.unsumnet <- function(x, ...) {
 #' @description This will create a directed \code{igraph} network and call its
 #' plotting methods
 #' @param aw a matrix
-#' @param ... arguments passed through to \code{\link{plot.igraph}}
+#' @param ... arguments passed through to \code{plot.igraph}
 #'
 #' @export
 #'

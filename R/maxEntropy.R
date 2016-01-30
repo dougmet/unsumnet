@@ -9,10 +9,10 @@
 #' Missing values are allowed but will result in a warning. The usefulness of 
 #' such results is up to the user.
 #' 
-#' @param data a data.frame object containing row sums (first) and column sums
-#' (second) and optionally a vector of node names in any column. The row and 
-#' column sums are extracted and passed to maxEntropy.numeric
-#' @param rs NumericVector the row sums of the matrix.
+#' @param rs Either a data.frame object containing row sums (first) and column sums
+#' (second) and optionally a vector of node names in any column. Or a vector of row
+#' sums only if the column sums, \code{cs}, are also supplied. For a data.frame 
+#' the row and column sums are extracted and passed to maxEntropy.numeric
 #' @param cs NumericVector the column sums of the matrix.
 #' @param minError Numeric. The algorithm will keep iterating until the mean squared 
 #' error against the constraints drops below this value.
@@ -23,15 +23,15 @@
 #'  if available from the \code{data} or from the names of \code{rs}.
 #' @export
 #'
-maxEntropy <- function(data, ...) UseMethod("maxEntropy")
+maxEntropy <- function(rs, ...) UseMethod("maxEntropy")
 
 #' @rdname maxEntropy
 #' @export
 #' @examples
 #' maxEntropy(neast)
-maxEntropy.data.frame <- function(data, ...) {
+maxEntropy.data.frame <- function(rs, ...) {
   # Clean the input
-  constraints <- processInput(data)
+  constraints <- processInput(rs)
   
   aw <- maxEntropy(constraints[,1], constraints[,2], ...)
   
@@ -46,7 +46,7 @@ maxEntropy.data.frame <- function(data, ...) {
 #' @export
 #' @examples
 #' maxEntropy(neast$outSum, neast$inSum)
-maxEntropy.numeric <- function(rs, cs, minError=1e-18) {
+maxEntropy.numeric <- function(rs, cs, minError=1e-18, ...) {
 
   if(length(rs)!=length(cs)) stop("rs and cs must be same length")
   
