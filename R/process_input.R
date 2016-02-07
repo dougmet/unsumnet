@@ -9,7 +9,7 @@
 #' @return an object ready for sending to the C++ functions as input
 #' @author Douglas Ashton
 #' 
-processInput <- function(constraints, useRowNames=FALSE) {
+process_input <- function(constraints, useRowNames=FALSE) {
   
   # Lots and lots of checking
   

@@ -8,13 +8,13 @@
 #' for \code{unsumnet} object) and zero for negative elements.
 #' @export
 #'
-nettedMatrix <- function(x) UseMethod("nettedMatrix")
+netted_matrix <- function(x) UseMethod("netted_matrix")
 
-#' @rdname nettedMatrix
+#' @rdname netted_matrix
 #' @export
 #' @examples
-#' nettedMatrix(matrix(rnorm(25), nrow=5))
-nettedMatrix.default <- function(x) {
+#' netted_matrix(matrix(rnorm(25), nrow=5))
+netted_matrix.default <- function(x) {
   
   if(!is.matrix(x) | !is.numeric(x)) stop("Must be a numeric matrix")
   if(nrow(x) != ncol(x)) stop("Must be square matrix")
@@ -25,8 +25,8 @@ nettedMatrix.default <- function(x) {
   return(wOut * (wOut>0))
 }
 
-#' @rdname nettedMatrix
+#' @rdname netted_matrix
 #' @export
-nettedMatrix.unsumnet <- function(x) {
-  nettedMatrix.default(x$AW)
+netted_matrix.unsumnet <- function(x) {
+  netted_matrix.default(x$AW)
 }
