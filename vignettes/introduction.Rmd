@@ -57,24 +57,24 @@ This returns an `unsumnet` object. The standard adjacency matrix is held in `fit
 fit$AW
 ```
 
-The plotUnsum method will plot a matrix and the S3 plot method will do the same for an `unsumnet` object.
+The `plot_unsum` method will plot a matrix and the S3 plot method will do the same for an `unsumnet` object.
 
 ```{r, fig.show='hold', fig.cap="True network compared to `unsumnet` reconstructed network"}
-plotUnsum(neastTrue, main="True network")
+plot_unsum(neastTrue, main="True network")
 plot(fit, main="Reconstructed network")
 ```
 
 
 ## Maximum Entropy Solution
 
-A commonly used solution for such aggregated data is known as the "maximum entropy" solution. The term is a little confusing from a statistical mechanics perspective but in this case it uses every possible edge and spreads out the weights as evenly as possible. The maximum entropy solution is provided by the `maxEntropy` function. It takes the same inputs as `unsum`. In our example this looks quite different to the true network.
+A commonly used solution for such aggregated data is known as the "maximum entropy" solution. The term is a little confusing from a statistical mechanics perspective but in this case it uses every possible edge and spreads out the weights as evenly as possible. The maximum entropy solution is provided by the `max_entropy` function. It takes the same inputs as `unsum`. In our example this looks quite different to the true network.
 
 ```{r, fig.show='hold', fig.cap="True network compared to maximum entropy network"}
 # Get the maximum entropy network
-neastME <- maxEntropy(neast)
+neastME <- max_entropy(neast)
 # Compare to the true network
-plotUnsum(neastTrue, main="True network")
-plotUnsum(neastME, main="Max Entropy")
+plot_unsum(neastTrue, main="True network")
+plot_unsum(neastME, main="Max Entropy")
 ```
 
 If no solution is possible then this function will return `FALSE`. This can be useful for testing impossible constraints.
@@ -84,7 +84,7 @@ If no solution is possible then this function will return `FALSE`. This can be u
 In stability terms it is often the netted positions that are more relevant. This is provided by the `nettedMatrix` function. It keeps the positive elements $(AW-AW')_+$.
 
 ```{r}
-plotUnsum(nettedMatrix(neastTrue))
+plot_unsum(nettedMatrix(neastTrue))
 ```
 
 ## Extra notes on `unsum`

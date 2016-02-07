@@ -24,8 +24,8 @@ plot.unsumnet <- function(x, ...) {
 #' @export
 #'
 #' @examples
-#' plotUnsum(rbind(c(0,1,2),c(0,0,1), c(1,0,0)))
-plotUnsum <- function(aw, ...) {
+#' plot_unsum(rbind(c(0,1,2),c(0,0,1), c(1,0,0)))
+plot_unsum <- function(aw, ...) {
   
   if (!requireNamespace("igraph", quietly = TRUE)) {
     stop("igraph needed for this function to work. Please install it.",
