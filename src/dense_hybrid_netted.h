@@ -13,7 +13,7 @@
  GNU General Public License for more details.
  
  You should have received a copy of the GNU General Public License
- along with dense_hybrid.  If not, see <http://www.gnu.org/licenses/>.
+ along with dense_hybrid_netted.  If not, see <http://www.gnu.org/licenses/>.
  
  */
 
@@ -52,7 +52,7 @@ using namespace std;
 
 
 
-class dense_hybrid
+class dense_hybrid_netted
 {
     
 public:
@@ -106,17 +106,22 @@ public:
     double maxw,minw, scalew;    // restrict the range of Ws (careful!)
     long nn, ncycles, vol;
     long target_ne, ne, ne0, nepair;     // Target number of edges and actual number, number at end of hot time, number of edge pairs
+    long max_ne;            // Size of edge arrays
     
     double beta, mu;        // fields for energy and ne (beta is inverse temperature, beta=1/T)
     double cooling_rate;
+
+    bool verbose;           // Whether to print to screen or not
+    bool MAXEDGES;          // If this is true then all possible edges are always on
+    bool NORETURN;          // If this is true then no return edges are allowed.
     
     
     ////////// METHODS //////////
-    dense_hybrid(int nn_in, int target_ne_in,
+    dense_hybrid_netted(int nn_in, int target_ne_in,
                  bool verbose_in,
                  bool inMAXEDGES,
                  bool inNORETURN); // constructor
-	~dense_hybrid();	// destructor
+	  ~dense_hybrid_netted();	// destructor
     
     int runjob(long  mct_schedule,
                long  hot_time,
@@ -136,7 +141,7 @@ public:
                       const std::vector<double> & target_net_out_i,
                       const std::vector<double> & target_net_in_i,
                       const std::vector<double> & target_ex_out_i);
-	void reset_arrays();
+	  void reset_arrays();
     double total_energy(double *inW);
     double total_energy();
     double total_energy_netted();

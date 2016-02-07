@@ -30,7 +30,7 @@ inline double pow2(double x)
 }
 
 
-dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
+dense_hybrid_netted::dense_hybrid_netted(int nn_in, int target_ne_in,
                            bool verbose_in,
                            bool inMAXEDGES,
                            bool inNORETURN)
@@ -101,112 +101,16 @@ dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
     
 }
 
-void init_targets(const std::vector<double> & target_out_i,
-                  const std::vector<double> & target_in_i,
-                  const std::vector<double> & target_net_out_i,
-                  const std::vector<double> & target_net_in_i,
-                  const std::vector<double> & target_ex_out_i)
+
+dense_hybrid_netted::~dense_hybrid_netted()
 {
-    
-    
-    maxw=0;
-    int ncount=0, checkid;
-    
-    
-    for (i=0;i<nn;i++)
-    {
-        
-        // ID
-        targetfile >> checkid;
-        if (!targetfile.good())
-            break;
-        ncount ++;
-        
-        bankid[i] = checkid;
-        
-        // Gross Sums
-        targetfile >> target_out[i];
-        targetfile >> target_in[i];
-        // Netted Sums
-        targetfile >> target_net_out[i];
-        targetfile >> target_net_in[i];
-        // Netted to external
-        double texout,texin;
-        targetfile >> texout;
-        targetfile >> texin;
-        
-        on_out[i] = on_in[i] = on_net_ex[i] = true;
-        if (fabs(target_out[i])<=1e-12)
-            on_out[i]=false;
-        if (fabs(target_in[i])<=1e-12)
-            on_in[i]=false;
-        
-        
-        // Netted to external is positive or negative
-        if (texout<-1e-12 && texin<-1e-12)
-        {
-            on_net_ex[i]=false;
-        }
-        else
-        {
-            if (texout>-1e-12)
-                target_ex_out[i] = texout;
-            else
-                target_ex_out[i] = -texin;
-        }
-        
-        if (target_in[i]>maxw)
-            maxw = target_in[i];
-        
-        if (target_out[i]>maxw)
-            maxw = target_out[i];
-        
-    }
-    
-
-    
-    // Some checks
-    if (ncount != nn)
-    {
-        cout << "Check number of nodes in input file. nn=" << nn << " ncount=" << ncount << endl; exit(1);
-    }
-    
-    if (bankid[0] != 99999)
-    {
-        cout << "First bank must be external bank, ID=99999. You have " << bankid[0] << endl; exit(1);
-    }
-    
-    scalew = maxw;
-    maxw=2.0;
-    minw=0.01/scalew;
-    
-    targetsread = true;
-    
-    cout << "Max allowed edge weight = " << scalew*maxw << ". Largest target=" << scalew << endl;
-    
-    // Now scale the whole problem
-    for (i=0;i<nn;i++)
-    {
-        target_out[i] /= scalew;
-        target_in[i] /= scalew;
-        target_net_out[i] /= scalew;
-        target_net_in[i] /= scalew;
-        target_ex_out[i] /= scalew;
-    }
-
-    
-}
-
-
-dense_hybrid::~dense_hybrid()
-{
-	// try to free everything
-	delete[] A;
+    // try to free everything
+    delete[] A;
     delete[] W;
     delete[] active_edges;
     delete[] active_edges0;
     delete[] bankid;
-	delete[] target_out;
+    delete[] target_out;
     delete[] target_in;
     delete[] sum_out;
     delete[] sum_in;
@@ -224,16 +128,72 @@ dense_hybrid::~dense_hybrid()
     delete[] on_net_ex;
     delete[] top;
     delete[] tip;
-	delete[] activeW;
+    delete[] activeW;
     delete[] cg_sum_out;
     delete[] cg_sum_in;
     delete[] cg_sum_net_out;
     delete[] cg_sum_net_in;
-	
+    
 }
 
 
-int dense_hybrid::runjob(long  mct_schedule,
+
+void dense_hybrid_netted::init_targets(const std::vector<double> & target_out_i,
+                                       const std::vector<double> & target_in_i,
+                                       const std::vector<double> & target_net_out_i,
+                                       const std::vector<double> & target_net_in_i,
+                                       const std::vector<double> & target_ex_out_i)
+{
+    
+    
+    maxw=0;
+    int ncount=0, checkid;
+    
+    
+    for (int i=0;i<nn;i++)
+    {
+        
+        on_out[i] = on_in[i] = on_net_ex[i] = true;
+        if (fabs(target_out_i[i])<=1e-12)
+            on_out[i]=false;
+        if (fabs(target_in_i[i])<=1e-12)
+            on_in[i]=false;
+        
+        
+        // Netted to external is positive or negative
+        if (target_ex_out_i[i]>-1e-12 && target_ex_out_i[i]<1e-12)
+        {
+            on_net_ex[i]=false;
+        }
+        
+        if (target_in_i[i]>maxw)
+            maxw = target_in_i[i];
+        
+        if (target_out_i[i]>maxw)
+            maxw = target_out_i[i];
+        
+    }
+    
+    
+    scalew = maxw;
+    maxw=2.0;
+    minw=0.01/scalew;
+    
+    // Now scale the whole problem
+    for (int i=0;i<nn;i++)
+    {
+        target_out[i] = target_out_i[i] / scalew;
+        target_in[i] = target_in_i[i] / scalew;
+        target_net_out[i] = target_net_out_i[i] / scalew;
+        target_net_in[i] = target_net_in_i[i] / scalew;
+        target_ex_out[i] = target_ex_out_i[i] / scalew;
+    }
+
+    
+}
+
+
+int dense_hybrid_netted::runjob(long  mct_schedule,
                          long  hot_time,
                          double beta0, double betamax,
                          double betanet0, double betanetmax,
@@ -244,6 +204,8 @@ int dense_hybrid::runjob(long  mct_schedule,
                          double cgmax)
 {
     
+    HERE HERE HERE
+
     // This function is the main job controller
     
     int newi,newj,nrn,newk;                          // Edge moves
@@ -517,7 +479,7 @@ int dense_hybrid::runjob(long  mct_schedule,
 //      Monte Carlo Sweep       //
 //////////////////////////////////
 
-int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
+int dense_hybrid_netted::mc_sweep(move_class ** move, int Nmoves)
 {
     
     int moves_perMC, sum_moves;
@@ -1422,7 +1384,7 @@ int dense_hybrid::mc_sweep(move_class ** move, int Nmoves)
 // Conjugate gradient functions
 //////////////////////////////////
 
-void dense_hybrid::reset_arrays()
+void dense_hybrid_netted::reset_arrays()
 {
     goforquench=false;
     
@@ -1562,7 +1524,7 @@ void dense_hybrid::reset_arrays()
 }
 
 
-double dense_hybrid::total_energy()
+double dense_hybrid_netted::total_energy()
 {
     int k,l;
     
@@ -1576,7 +1538,7 @@ double dense_hybrid::total_energy()
     return(total_energy(activeW)); // overload, by default use the W matrix
 }
 
-double dense_hybrid::total_energy_netted()
+double dense_hybrid_netted::total_energy_netted()
 {
     // For netted constraints this becomes a little clunky
     // If you want to use this with CG then you may need a reverse edges array
@@ -1619,7 +1581,7 @@ double dense_hybrid::total_energy_netted()
     return(tenergy);
 }
 
-double dense_hybrid::total_energy_ex()
+double dense_hybrid_netted::total_energy_ex()
 {
     double tenergy=0;
     int k,kr;
@@ -1637,7 +1599,7 @@ double dense_hybrid::total_energy_ex()
     return tenergy;
 }
 
-bool dense_hybrid::rowcol_iterate()
+bool dense_hybrid_netted::rowcol_iterate()
 {
     // actW is a smaller array with only active weights
     
@@ -1760,7 +1722,7 @@ bool dense_hybrid::rowcol_iterate()
 
 
 
-double dense_hybrid::total_energy(double *actW)
+double dense_hybrid_netted::total_energy(double *actW)
 {
     // activeW is a smaller
     
@@ -1799,7 +1761,7 @@ double dense_hybrid::total_energy(double *actW)
     
 }
 
-void dense_hybrid::link_active_reverse()
+void dense_hybrid_netted::link_active_reverse()
 {
     // This is a very slow function so think twice before using it a lot
     // In it's current form it scales like ne^2. That's *edges* squared.
