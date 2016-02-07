@@ -23,7 +23,7 @@ install_github(repo="unsumnet", username="dougmet", build_vignettes=TRUE)
 There's a vignette already to help you get started. If you used the `build_vignettes=TRUE` argument then you can do
 
 ```{r}
-vignette("introduction", package="unsumnet")
+vignette("Introduction", package="unsumnet")
 ```
 
 A copy of this is in the wiki page [Introduction](https://github.com/dougmet/unsumnet/wiki/Introduction)

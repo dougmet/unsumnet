@@ -1,7 +1,7 @@
 
 #' Plot method for an \code{unsumnet} network
 #'
-#' @description Passes the weighted adjacency matrix to \code{\link{plotUnsum}}
+#' @description Passes the weighted adjacency matrix to \code{\link{plot_unsum}}
 #' which is a wrapper around the igraph plot. You will need to install
 #' \code{igraph} to use this plot method.
 #' @param x an \code{unsumnet} object
@@ -11,7 +11,7 @@
 #'
 plot.unsumnet <- function(x, ...) {
   # Plot the weighted adjacency matrix
-  plotUnsum(x$AW, ...)
+  plot_unsum(x$AW, ...)
 }
 
 #' Plot function for a weighted adjacency matrix

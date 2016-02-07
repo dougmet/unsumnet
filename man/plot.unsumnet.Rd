@@ -12,7 +12,7 @@
 \item{...}{extra options passed through to \code{plot.igraph}}
 }
 \description{
-Passes the weighted adjacency matrix to \code{\link{plotUnsum}}
+Passes the weighted adjacency matrix to \code{\link{plot_unsum}}
 which is a wrapper around the igraph plot. You will need to install
 \code{igraph} to use this plot method.
 }

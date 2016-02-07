@@ -81,10 +81,10 @@ If no solution is possible then this function will return `FALSE`. This can be u
 
 ## Netted matrix
 
-In stability terms it is often the netted positions that are more relevant. This is provided by the `nettedMatrix` function. It keeps the positive elements $(AW-AW')_+$.
+In stability terms it is often the netted positions that are more relevant. This is provided by the `netted_matrix` function. It keeps the positive elements $(AW-AW')_+$.
 
 ```{r}
-plot_unsum(nettedMatrix(neastTrue))
+plot_unsum(netted_matrix(neastTrue))
 ```
 
 ## Extra notes on `unsum`

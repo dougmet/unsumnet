@@ -17,5 +17,6 @@ Suggests:
     igraph,
     knitr,
     rmarkdown
-VignetteBuilder: rmarkdown
+VignetteBuilder: rmarkdown,
+    knitr
 RoxygenNote: 5.0.1
