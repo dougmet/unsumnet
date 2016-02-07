@@ -13,7 +13,7 @@
  GNU General Public License for more details.
  
  You should have received a copy of the GNU General Public License
- along with dense_hybrid.  If not, see <http://www.gnu.org/licenses/>.
+ along with dense_hybrid_netted.  If not, see <http://www.gnu.org/licenses/>.
  
  */
 
@@ -29,14 +29,6 @@ inline double pow2(double x)
     return(x*x);
 }
 
-
-void write_monitor(const char *filename, long t, double data)
-{
-    ofstream monfile;
-    monfile.open(filename, ios::app);
-    monfile << t << " " << data << endl;
-    monfile.close();
-}
 
 dense_hybrid::dense_hybrid(int nn_in, int target_ne_in,
                            bool verbose_in,
