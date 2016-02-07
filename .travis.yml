@@ -3,5 +3,4 @@ warnings_are_errors: true
 sudo: required
 branches:
   except:
-    - debug_plateau
-    - netted
+    - netted2
