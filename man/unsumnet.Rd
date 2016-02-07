@@ -19,9 +19,9 @@ provided.
 
 \section{Extra functions}{
 
-\code{\link{maxEntropy}} calculates the commonly used "maximum entropy" 
+\code{\link{max_entropy}} calculates the commonly used "maximum entropy" 
 (outer product) solution by iteratively forcing row and column constraints.
-\code{\link{nettedMatrix}} provides the netted exposures from the gross matrix.
+\code{\link{netted_matrix}} provides the netted exposures from the gross matrix.
 }
 
 \section{Data sets}{
