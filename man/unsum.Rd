@@ -20,7 +20,7 @@ adjacency matrix should have.}
 screen. Default is FALSE.}
 
 \item{maxEdges}{Logical if set to TRUE then all possible edges will be used.
-The number of possible edges is given by \code{\link{calcMaxEdges}}. Default
+The number of possible edges is given by \code{\link{calc_max_edges}}. Default
 is FALSE.}
 
 \item{noReturn}{If set to TRUE then only one directed edge can go between two

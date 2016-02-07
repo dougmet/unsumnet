@@ -31,7 +31,7 @@ max_entropy <- function(rs, ...) UseMethod("max_entropy")
 #' max_entropy(neast)
 max_entropy.data.frame <- function(rs, ...) {
   # Clean the input
-  constraints <- processInput(rs)
+  constraints <- process_input(rs)
   
   aw <- max_entropy(constraints[,1], constraints[,2], ...)
   

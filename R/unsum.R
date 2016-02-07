@@ -7,7 +7,7 @@
 #' @param verbose Logical if set to TRUE then maximum output will be written to
 #' screen. Default is FALSE.
 #' @param maxEdges Logical if set to TRUE then all possible edges will be used.
-#' The number of possible edges is given by \code{\link{calcMaxEdges}}. Default
+#' The number of possible edges is given by \code{\link{calc_max_edges}}. Default
 #' is FALSE.
 #' @param noReturn If set to TRUE then only one directed edge can go between two
 #' nodes. This would be appropriate if only modelling netted positions for example.
@@ -64,7 +64,7 @@ unsum <- function(constraints,
                   minError=1e-3) {
   
   # Clean the input
-  constraints <- processInput(constraints)
+  constraints <- process_input(constraints)
   
   # Quick length/type check of other inputs
   stopifnot(is.logical(maxEdges), length(maxEdges)==1)
@@ -90,7 +90,7 @@ unsum <- function(constraints,
     if(nEdges > nrow(constraints)*(nrow(constraints)-1))
       stop("Too many edges specified for matrix size")
     
-    if(nEdges > calcMaxEdges(constraints[,1], constraints[,2])) {
+    if(nEdges > calc_max_edges(constraints[,1], constraints[,2])) {
       warning("More edges specified than possible for these row/col sums")
     }
     
@@ -99,7 +99,7 @@ unsum <- function(constraints,
   }
   
   # Specify the maximum number of edges if asked for
-  if(maxEdges) nEdges <- calcMaxEdges(constraints[,1], constraints[,2])
+  if(maxEdges) nEdges <- calc_max_edges(constraints[,1], constraints[,2])
   
   if(coolingRate<=1) stop("coolingRate must be greater than 1")
   
@@ -143,7 +143,7 @@ unsum <- function(constraints,
 #' @return maximum possible number of edges
 #' @author Douglas Ashton
 #' @export
-calcMaxEdges <- function(rs, cs) {
+calc_max_edges <- function(rs, cs) {
   n1 <- sum(rs>0)
   n2 <- sum(cs>0)
   nb <- sum(rs>0 & cs>0)
