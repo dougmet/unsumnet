@@ -5,9 +5,9 @@
 
 using namespace Rcpp;
 
-// maxEntropyCpp
-NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs, double minError);
-RcppExport SEXP unsumnet_maxEntropyCpp(SEXP awSEXP, SEXP rsSEXP, SEXP csSEXP, SEXP minErrorSEXP) {
+// max_entropy_cpp
+NumericMatrix max_entropy_cpp(NumericMatrix aw, NumericVector rs, NumericVector cs, double minError);
+RcppExport SEXP unsumnet_max_entropy_cpp(SEXP awSEXP, SEXP rsSEXP, SEXP csSEXP, SEXP minErrorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -15,7 +15,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type rs(rsSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type cs(csSEXP);
     Rcpp::traits::input_parameter< double >::type minError(minErrorSEXP);
-    __result = Rcpp::wrap(maxEntropyCpp(aw, rs, cs, minError));
+    __result = Rcpp::wrap(max_entropy_cpp(aw, rs, cs, minError));
     return __result;
 END_RCPP
 }

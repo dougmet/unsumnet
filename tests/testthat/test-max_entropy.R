@@ -1,6 +1,6 @@
-context('Test the maxEntropy function')
+context('Test the max_entropy function')
 
-test_that('maxEntropy gives correct result', {
+test_that('max_entropy gives correct result', {
   set.seed(33)
   a <- matrix(sample(0:1, 400, prob = c(0.85,0.15), replace=TRUE), ncol=20)
   diag(a) <- 0
@@ -103,19 +103,19 @@ test_that('maxEntropy gives correct result', {
   3.23612753752641, 2.8426923200405, 7.92667212135082, 5.21508127285842, 
   14.5461978488908, 3.78976624937808, 0), .Dim = c(20L, 20L))
 
-  expect_equal(maxEntropy(rs,cs, minError=1e-18), tw)
+  expect_equal(max_entropy(rs,cs, minError=1e-18), tw)
 })
 
-test_that('maxEntropy fails when it should', {
-  expect_false(maxEntropy(c(10, 3,1), c(5,0,9)))
+test_that('max_entropy fails when it should', {
+  expect_false(max_entropy(c(10, 3,1), c(5,0,9)))
 })
 
-test_that('maxEntropy deals with missings', {
+test_that('max_entropy deals with missings', {
   # Should give a warning for missings
-  expect_warning(maxEntropy(c(1,2,NA), c(1,2,2)))
+  expect_warning(max_entropy(c(1,2,NA), c(1,2,2)))
   
   # Must give a sensible result for missings
-  expect_equal(suppressWarnings(maxEntropy(c(1,2,NA), c(1,2,2))), 
+  expect_equal(suppressWarnings(max_entropy(c(1,2,NA), c(1,2,2))), 
   structure(c(0, 0.5000000003705, 0.4999999996295, 0.5000000003705, 
   0, 1.4999999996295, 0.49999999981475, 1.50000000018525, 0), .Dim = c(3L, 3L)))
   

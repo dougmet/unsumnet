@@ -9,7 +9,7 @@ using namespace Rcpp;
 //’ @param minError double minimum error for the iterator.
 //’ @return NumericMatrix with the solution or the result after 5000 iterations.
 // [[Rcpp::export]]
-NumericMatrix maxEntropyCpp(NumericMatrix aw, NumericVector rs, NumericVector cs,
+NumericMatrix max_entropy_cpp(NumericMatrix aw, NumericVector rs, NumericVector cs,
                             double minError) {
   
   double err = 1;

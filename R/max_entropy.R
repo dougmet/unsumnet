@@ -64,7 +64,7 @@ max_entropy.numeric <- function(rs, cs, minError=1e-18, ...) {
   aw <- matrix(1, nrow=length(rs), ncol=length(cs)) - diag(1, nrow=length(rs))
   
   # Call the C++ function to do the iteration
-  aw <- max_entropyCpp(aw, rs, cs, minError);
+  aw <- max_entropy_cpp(aw, rs, cs, minError);
   
   if(any(is.nan(aw))) {
     warning("max_entropy created NaNs")
