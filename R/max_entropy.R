@@ -12,28 +12,28 @@
 #' @param rs Either a data.frame object containing row sums (first) and column sums
 #' (second) and optionally a vector of node names in any column. Or a vector of row
 #' sums only if the column sums, \code{cs}, are also supplied. For a data.frame 
-#' the row and column sums are extracted and passed to maxEntropy.numeric
+#' the row and column sums are extracted and passed to max_entropy.numeric
 #' @param cs NumericVector the column sums of the matrix.
 #' @param minError Numeric. The algorithm will keep iterating until the mean squared 
 #' error against the constraints drops below this value.
-#' @param ... extra arguments passed to \code{\link{maxEntropy.numeric}}
+#' @param ... extra arguments passed to \code{\link{max_entropy.numeric}}
 #'
 #' @return A matrix that satisfies the row and column sum constraints or FALSE
 #'  if the algorithm failed to converge. Dimension names will be pulled through
 #'  if available from the \code{data} or from the names of \code{rs}.
 #' @export
 #'
-maxEntropy <- function(rs, ...) UseMethod("maxEntropy")
+max_entropy <- function(rs, ...) UseMethod("max_entropy")
 
-#' @rdname maxEntropy
+#' @rdname max_entropy
 #' @export
 #' @examples
-#' maxEntropy(neast)
-maxEntropy.data.frame <- function(rs, ...) {
+#' max_entropy(neast)
+max_entropy.data.frame <- function(rs, ...) {
   # Clean the input
   constraints <- processInput(rs)
   
-  aw <- maxEntropy(constraints[,1], constraints[,2], ...)
+  aw <- max_entropy(constraints[,1], constraints[,2], ...)
   
   if(!is.null(dimnames(constraints))) {
     dimnames(aw) <- list(dimnames(constraints)[[1]], dimnames(constraints)[[1]])
@@ -42,17 +42,17 @@ maxEntropy.data.frame <- function(rs, ...) {
   return(aw)
 }
 
-#' @rdname maxEntropy
+#' @rdname max_entropy
 #' @export
 #' @examples
-#' maxEntropy(neast$outSum, neast$inSum)
-maxEntropy.numeric <- function(rs, cs, minError=1e-18, ...) {
+#' max_entropy(neast$outSum, neast$inSum)
+max_entropy.numeric <- function(rs, cs, minError=1e-18, ...) {
 
   if(length(rs)!=length(cs)) stop("rs and cs must be same length")
   
   if (any(is.na(rs)) | any(rs<0, na.rm=TRUE) | 
       any(is.na(cs)) | any(cs<0, na.rm=TRUE))
-    warning("maxEntropy is not well defined with missing values")
+    warning("max_entropy is not well defined with missing values")
   else {
     if(sum(rs) != sum(cs)) {
       stop(paste("Sum of row and column sums should be the same when there are no missings. sum(rs)-sum(cs) =",
@@ -64,10 +64,10 @@ maxEntropy.numeric <- function(rs, cs, minError=1e-18, ...) {
   aw <- matrix(1, nrow=length(rs), ncol=length(cs)) - diag(1, nrow=length(rs))
   
   # Call the C++ function to do the iteration
-  aw <- maxEntropyCpp(aw, rs, cs, minError);
+  aw <- max_entropyCpp(aw, rs, cs, minError);
   
   if(any(is.nan(aw))) {
-    warning("maxEntropy created NaNs")
+    warning("max_entropy created NaNs")
     return(FALSE)
   }
     
