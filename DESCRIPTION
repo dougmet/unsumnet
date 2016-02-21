@@ -20,3 +20,5 @@ Suggests:
 VignetteBuilder: rmarkdown,
     knitr
 RoxygenNote: 5.0.1
+URL: https://github.com/dougmet/unsumnet
+BugReports: https://github.com/dougmet/unsumnet/issues
