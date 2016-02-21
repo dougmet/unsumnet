@@ -1,4 +1,6 @@
-# `unsumnet` Reconstructing networks from aggregated data.
+# unsumnet
+
+> Reconstructing networks from aggregated data.
 
 [![Build Status](https://travis-ci.org/dougmet/unsumnet.svg?branch=master)](https://travis-ci.org/dougmet/unsumnet)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/dougmet/unsumnet?branch=master&svg=true)](https://ci.appveyor.com/project/dougmet/unsumnet)
