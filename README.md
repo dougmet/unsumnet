@@ -2,7 +2,7 @@
 
 <a href="https://travis-ci.org/dougmet/unsumnet">
 <img title="Build Status Images" src="https://travis-ci.org/dougmet/unsumnet.svg">
-</a>
+</a>[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/dougmet/unsumnet?branch=master&svg=true)](https://ci.appveyor.com/project/dougmet/unsumnet)
 
 Welcome to the `unsumnet` project.
 
