@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 
 Welcome to the `unsumnet` project.
 
-This project is an R interface to a C++ project to solve aggregated network data using simulated annealing. It is distributed as open source softwarre under the MIT license. If you find reproducible problems that have not already been raised then please create a ticket on the issues page.
+This project is an R interface to a C++ project to solve aggregated network data using simulated annealing. It is distributed as open source software under the MIT license. If you find reproducible problems that have not already been raised then please create a ticket on the issues page.
 
 # Installation
 
@@ -151,5 +151,5 @@ The `unsum` function has many parameters with default values. These are detailed
 
 ## Final note
 
-This package is very new and will likely change. There are some known stability issues, if you find a reproducible problem then leave an issue on the [GitHub page](https://www.github.com/dougmet/unsumnet/) Other control parameters, such as controlling for known netted positions will be coming soon.
+This package is package is under development and any feedback is welcome. If you find a reproducible problem then leave an issue on the [GitHub page](https://www.github.com/dougmet/unsumnet/). Other control parameters, such as controlling for known netted positions will be coming soon.
 
