@@ -21,6 +21,8 @@ plot.unsumnet <- function(x, ...) {
 #' @param aw a matrix
 #' @param ... arguments passed through to \code{plot.igraph}
 #'
+#' @importFrom grDevices rgb
+#' @importFrom graphics par
 #' @export
 #'
 #' @examples
@@ -29,6 +31,16 @@ plot_unsum <- function(aw, ...) {
   
   if (!requireNamespace("igraph", quietly = TRUE)) {
     stop("igraph needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  
+  if (!requireNamespace("grDevices", quietly = TRUE)) {
+    stop("grDevices needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  
+  if (!requireNamespace("graphics", quietly = TRUE)) {
+    stop("graphics needed for this function to work. Please install it.",
          call. = FALSE)
   }
   
