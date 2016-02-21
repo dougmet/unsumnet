@@ -59,7 +59,7 @@ fit$AW
 
 The `plot_unsum` method will plot a matrix and the S3 plot method will do the same for an `unsumnet` object.
 
-```{r, fig.show='hold', fig.cap="True network compared to `unsumnet` reconstructed network"}
+```{r, plot_unsum, fig.show='hold', fig.cap="True network compared to `unsumnet` reconstructed network"}
 plot_unsum(neastTrue, main="True network")
 plot(fit, main="Reconstructed network")
 ```
@@ -69,7 +69,7 @@ plot(fit, main="Reconstructed network")
 
 A commonly used solution for such aggregated data is known as the "maximum entropy" solution. The term is a little confusing from a statistical mechanics perspective but in this case it uses every possible edge and spreads out the weights as evenly as possible. The maximum entropy solution is provided by the `max_entropy` function. It takes the same inputs as `unsum`. In our example this looks quite different to the true network.
 
-```{r, fig.show='hold', fig.cap="True network compared to maximum entropy network"}
+```{r, max_entropy, fig.show='hold', fig.cap="True network compared to maximum entropy network"}
 # Get the maximum entropy network
 neastME <- max_entropy(neast)
 # Compare to the true network
@@ -83,7 +83,7 @@ If no solution is possible then this function will return `FALSE`. This can be u
 
 In stability terms it is often the netted positions that are more relevant. This is provided by the `netted_matrix` function. It keeps the positive elements $(AW-AW')_+$.
 
-```{r}
+```{r, plot_netted}
 plot_unsum(netted_matrix(neastTrue))
 ```
 
@@ -113,4 +113,4 @@ The `unsum` function has many parameters with default values. These are detailed
 
 ## Final note
 
-This package is very new and will likely change. There are some known stability issues, if you find a reproducible problem then leave an issue on the [GitHub page](https://www.github.com/dougmet/unsumnet/) Other control parameters, such as controlling for known netted positions will be coming soon.
+This package is under constant development at its [GitHub page](https://www.github.com/dougmet/unsumnet/). Please report any problems/feature requests on the issue tracker there. Other control parameters, such as controlling for known netted positions will be coming soon.
