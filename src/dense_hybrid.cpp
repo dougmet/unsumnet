@@ -115,7 +115,7 @@ void dense_hybrid::init_targets(const std::vector<double> & target_out_i,
         if (target_in_i[i]>maxw)
             maxw = target_in_i[i];
         
-        if (target_out[i]>maxw)
+        if (target_out_i[i]>maxw)
             maxw = target_out_i[i];
         
     }
@@ -277,6 +277,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
 					
 					if (nsmallderiv>10)
 					{
+                        for(int i=0;i<Nmoves;i++) delete move[i];
                         return(DH_FAIL_PLATEAU);
 					}
 				}
@@ -333,6 +334,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
                 {
                     if (rowcol_iterate())
                     {
+                        for(int i=0;i<Nmoves;i++) delete move[i];
                         return(DH_SUCCESS);
                     }
                 }
@@ -348,6 +350,7 @@ if (MAXEDGES)    // In the max edges run we always switch off insertions/deletio
     } // end mct loop
     
     // Hit the buffers without success
+    for(int i=0;i<Nmoves;i++) delete move[i];
 	return (DH_FAIL_TIME_OUT);
 }
 
