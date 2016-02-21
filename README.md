@@ -46,7 +46,7 @@ In general there are many possible networks that could satisfy these constraints
 Aggregated Data
 ---------------
 
-Consider the following fictional banking system. It consists of six banks and they form a closed network of loans, which is represented by the weighted adkacency matrix, `neastTrue`,
+Consider the following fictional banking system. It consists of six banks and they form a closed network of loans, which is represented by the weighted adjacency matrix, `neastTrue`,
 
 ``` r
 library(unsumnet)
