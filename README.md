@@ -20,7 +20,7 @@ and then run
 
 ```{r}
 library(devtools)
-install_github(repo="unsumnet", username="dougmet", build_vignettes=TRUE)
+install_github("dougmet/unsumnet", build_vignettes=TRUE)
 ```
 
 There's a vignette already to help you get started. If you used the `build_vignettes=TRUE` argument then you can do
