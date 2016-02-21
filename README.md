@@ -170,3 +170,8 @@ Final note
 ----------
 
 This package is package is under development and any feedback is welcome. If you find a reproducible problem then leave an issue on the [GitHub page](https://www.github.com/dougmet/unsumnet/). Other control parameters, such as controlling for known netted positions will be coming soon.
+
+License
+-------
+
+MIT © [Douglas Ashton](https://github.com/dougmet)
