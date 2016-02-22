@@ -1,6 +1,6 @@
 Package: unsumnet
 Title: Solve Row and Column Sum Network Constraint Problems
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(person("Douglas", "Ashton", email="douglas.j.ashton@gmail.com", role=c("aut","cre")),
              person("Makoto", "Matsumoto", role=c("ctb"), comment = "MersenneTwister"),
              person("Takuji", "Nishimura", role=c("ctb"), comment = "MersenneTwister"),
