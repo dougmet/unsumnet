@@ -1,4 +1,11 @@
+## Fixes in this version
+
+* MersenneTwister copyright notice added to LICENSE file
+* MersenneTwister authors added as contributors to DESCRIPTION
+* MersenneTwister authors informed by email of this package (only Richard Wagner's email address is working)
+
 ## Test environments
+
 * local OS X install, R 3.2.3
 * ubuntu 12.04 (on travis-ci), R 3.2.3
 * win-builder (devel and release)
