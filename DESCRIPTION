@@ -1,7 +1,11 @@
 Package: unsumnet
 Title: Solve Row and Column Sum Network Constraint Problems
 Version: 0.1.0
-Authors@R: person("Douglas", "Ashton", email="douglas.j.ashton@gmail.com", role=c("aut","cre"))
+Authors@R: c(person("Douglas", "Ashton", email="douglas.j.ashton@gmail.com", role=c("aut","cre")),
+             person("Makoto", "Matsumoto", role=c("ctb"), comment = "MersenneTwister"),
+             person("Takuji", "Nishimura", role=c("ctb"), comment = "MersenneTwister"),
+             person("Shawn", "Cokus", role=c("ctb"), comment = "MersenneTwister"),
+             person("Richard", "Wagner", email="rjwagner@writeme.com", role=c("ctb"), comment = "MersenneTwister"))
 Description: For reconstructing weighted networks where you only have the sum of
     all outgoing edges and the sum of all incoming edges. This package will sample
     from all possible networks using exponential random graph models (ERGMs) and simulated annealing.
