@@ -5,4 +5,5 @@ sudo: false
 branches:
   except:
     - netted2
+    - randomC11
 
